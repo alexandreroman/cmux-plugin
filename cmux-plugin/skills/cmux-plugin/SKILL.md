@@ -1,5 +1,5 @@
 ---
-name: cmux
+name: cmux-plugin
 description: Use cmux terminal features when running inside cmux. Detected via CMUX_WORKSPACE_ID environment variable. Apply proactively for parallel work (worktrees, sub-agents, long tasks), browser-based testing, sidebar progress reporting, and attention notifications. Do NOT apply when not inside cmux.
 ---
 

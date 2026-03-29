@@ -8,7 +8,7 @@ Open a cmux browser split for visual verification.
 2. Get current surface ID from `cmux identify --json`
 3. Open a browser split to the right: `cmux browser surface:<id> open-split --direction right`
 4. Wait 1 second for the split to initialize
-5. Navigate to: $ARGUMENTS (if provided) or http://localhost:3000 (default)
+5. Navigate to: $ARGUMENTS (if provided) or <http://localhost:3000> (default)
    `cmux browser surface:2 navigate "<url>"`
 6. Take a snapshot to confirm the page loaded: `cmux browser surface:2 snapshot --compact`
 7. Report what you see — page title, any visible errors, key UI elements
