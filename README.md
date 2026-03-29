@@ -1,4 +1,4 @@
-# cmux — Claude Code Plugin
+# CMUX-PLUGIN — for Claude Code
 
 Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.dev) — the native macOS terminal built for AI coding agents.
 
@@ -25,7 +25,7 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 ```bash
 # In Claude Code
 /plugin marketplace add hopchouinard/patchoutech-plugins
-/plugin install cmux@patchoutech-plugins
+/plugin install cmux-plugin@patchoutech-plugins
 /reload-plugins
 ```
 
@@ -59,13 +59,11 @@ If you have the [Superpowers plugin](https://claude.com/plugins/superpowers) ins
 
 ```
 cmux-plugin/
-├── .claude-plugin/
-│   └── marketplace.json       # Marketplace manifest
-├── cmux/
+├── cmux-plugin/
 │   ├── .claude-plugin/
 │   │   └── plugin.json        # Plugin manifest
 │   ├── skills/
-│   │   └── cmux/
+│   │   └── cmux-plugin/
 │   │       └── SKILL.md       # Core skill — teaches Claude when/how to use cmux
 │   ├── hooks/
 │   │   └── hooks.json         # Hook event declarations
