@@ -47,6 +47,31 @@ When inside cmux, Claude will:
 - **Open a browser split** when it needs to visually verify UI or test a dev server
 - **Send a notification** at genuine handoff points — not after every step
 
+## Forcing Reliable Activation
+
+To ensure Claude actually triggers the cmux skill before every relevant action — especially before dispatching parallel sub-agents, where other skills can take precedence — add a `SessionStart` hook to `~/.claude/settings.json`. It injects an explicit reminder whenever `CMUX_WORKSPACE_ID` is set.
+
+The simplest way is to ask Claude to install it for you — e.g. *"install the cmux-plugin SessionStart hook in my user settings"*. Claude will merge the snippet below into `~/.claude/settings.json` (preserving your existing config), validate the JSON, and pipe-test the command. Otherwise, paste it in by hand:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -n \"$CMUX_WORKSPACE_ID\" ]; then jq -n '{hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:\"You are running inside cmux (CMUX_WORKSPACE_ID is set). You MUST invoke the cmux-plugin:cmux-plugin skill via the Skill tool BEFORE: dispatching parallel sub-agents (Agent tool), launching long-running tasks (>30s), browser-based testing, or any work that benefits from sidebar progress reporting and attention notifications. Do this proactively without waiting for the user to ask.\"}}'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Outside cmux the hook outputs nothing and exits 0, so it is safe to keep enabled globally. After editing, open `/hooks` once or restart Claude Code for the watcher to pick up the change.
+
 ## Works With Superpowers
 
 If you have the [Superpowers plugin](https://claude.com/plugins/superpowers) installed, the cmux skill is aware of its workflow phases:
