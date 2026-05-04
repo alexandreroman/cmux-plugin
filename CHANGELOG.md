@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.2] — 2026-05-04
+
+### Fixed
+- Flattened plugin layout: moved `.claude-plugin/`, `commands/`, `hooks/`, `scripts/`, `skills/` from the `cmux-plugin/` subdirectory to the repo root so Claude Code detects the skill correctly
+
+---
+
 ## [1.0.1] — 2026-03-12
 
 ### Fixed

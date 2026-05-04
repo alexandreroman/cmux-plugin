@@ -86,5 +86,6 @@ MIT — see [LICENSE](LICENSE).
 
 ## Author
 
-Patrick Chouinard ([@hopchouinard](https://github.com/hopchouinard))  
-AI Acceleration Specialist · [Wepoint](https://wepoint.ca)
+Maintained by Alexandre Roman ([@alexandreroman](https://github.com/alexandreroman)).
+
+Forked from [hopchouinard/cmux-plugin](https://github.com/hopchouinard/cmux-plugin) — original work by Patrick Chouinard ([@hopchouinard](https://github.com/hopchouinard)), AI Acceleration Specialist · [Wepoint](https://wepoint.ca).
