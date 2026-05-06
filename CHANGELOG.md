@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.4] — 2026-05-05
+
+### Fixed
+- Suppress Claude Code's redundant "Claude is waiting for your input" idle notification. Registering a `Notification` hook intercepts the event before Claude Code falls back to its default OS notification; the plugin filters out the idle message while still forwarding genuine messages (e.g. permission prompts) to cmux
+
+---
+
 ## [1.0.3] — 2026-05-05
 
 ### Fixed
