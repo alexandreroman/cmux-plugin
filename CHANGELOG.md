@@ -7,6 +7,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.3] — 2026-05-05
+
+### Fixed
+- Removed the `Stop` hook to avoid duplicate end-of-turn notifications. cmux already shows a native notification with the response content when Claude finishes; the plugin's static "Session complete" notification was redundant. Sub-agent notifications via `PostToolUse(Task)` are kept
+
+### Changed
+- Sub-agent notifications now include the agent type (`subagent_type`) and short description (`description`) extracted from the `Task` tool input, e.g. `Explore: Branch ship-readiness audit`
+
+---
+
 ## [1.0.2] — 2026-05-04
 
 ### Fixed

@@ -1,8 +1,9 @@
 #!/bin/bash
 # cmux-notify.sh
-# Fires on Claude Code Stop and PostToolUse(Task) events.
-# Sends a cmux notification so you know when Claude or a sub-agent
-# has finished and needs your attention.
+# Fires on PostToolUse(Task) — notifies when a sub-agent finishes.
+# Stop events are intentionally not handled: cmux already shows a
+# native end-of-turn notification with the response content, so a
+# second one would just be noise.
 #
 # Silently exits if not running inside cmux.
 
@@ -13,26 +14,23 @@ command -v jq   &>/dev/null                  || exit 0
 
 # ── Parse event ───────────────────────────────────────────────────────────────
 EVENT=$(cat)
-EVENT_TYPE=$(echo "$EVENT" | jq -r '.hook_event_name // .event // "unknown"')
-TOOL=$(echo "$EVENT"       | jq -r '.tool_name // ""')
+EVENT_TYPE=$(echo "$EVENT"   | jq -r '.hook_event_name // .event // "unknown"')
+TOOL=$(echo "$EVENT"         | jq -r '.tool_name // ""')
+AGENT_TYPE=$(echo "$EVENT"   | jq -r '.tool_input.subagent_type // "general-purpose"')
+AGENT_DESC=$(echo "$EVENT"   | jq -r '.tool_input.description // ""')
 
 # ── Notify by event type ───────────────────────────────────────────────────────
-case "$EVENT_TYPE" in
-    "Stop")
-        cmux notify \
-            --title "Claude Code" \
-            --body  "Session complete — ready for your review" \
-            2>/dev/null
-        ;;
-    "PostToolUse")
-        if [ "$TOOL" = "Task" ]; then
-            cmux notify \
-                --title "Claude Code" \
-                --subtitle "Sub-agent" \
-                --body  "Agent finished — check results" \
-                2>/dev/null
-        fi
-        ;;
-esac
+if [ "$EVENT_TYPE" = "PostToolUse" ] && [ "$TOOL" = "Task" ]; then
+    if [ -n "$AGENT_DESC" ]; then
+        BODY="$AGENT_TYPE: $AGENT_DESC"
+    else
+        BODY="$AGENT_TYPE finished"
+    fi
+    cmux notify \
+        --title "Claude Code" \
+        --subtitle "Sub-agent finished" \
+        --body  "$BODY" \
+        2>/dev/null
+fi
 
 exit 0

@@ -7,7 +7,7 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 | Feature | How it works |
 |---|---|
 | **Auto workspace naming** | `SessionStart` hook renames the cmux sidebar tab to your git repo name + branch on every session |
-| **Completion notifications** | `Stop` and sub-agent `Task` hooks fire cmux notifications so you know when Claude or a sub-agent needs your attention |
+| **Sub-agent notifications** | `PostToolUse(Task)` hook fires a cmux notification when a sub-agent finishes. End-of-turn notifications are handled natively by cmux, so the plugin does not duplicate them |
 | **Sidebar progress** | The cmux skill teaches Claude to report long-running task progress as a live progress bar in the sidebar |
 | **Browser split automation** | Claude proactively opens a browser split when it needs to visually verify your dev server or debug UI |
 | **Superpowers integration** | When the [Superpowers plugin](https://claude.com/plugins/superpowers) triggers `using-git-worktrees`, Claude opens a new cmux workspace for the branch automatically |
@@ -93,7 +93,7 @@ cmux-plugin/
 │   └── hooks.json             # Hook event declarations
 ├── scripts/
 │   ├── cmux-session-start.sh  # Renames workspace tab on session start
-│   └── cmux-notify.sh         # Sends notifications on Stop / sub-agent finish
+│   └── cmux-notify.sh         # Sends notifications when a sub-agent finishes
 ├── commands/
 │   ├── status.md              # /cmux:status
 │   └── open-browser.md        # /cmux:open-browser
