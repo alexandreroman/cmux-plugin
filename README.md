@@ -61,7 +61,7 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 `.worktrees/` should be in your repo's `.gitignore`. `/cmux:start-feature` adds it
 automatically if missing.
 
-#### Worktree environment setup
+#### Worktree lifecycle hooks
 
 `/cmux:start-feature` does two things to make the new worktree usable immediately:
 
@@ -71,13 +71,13 @@ automatically if missing.
    either location propagate (one shared source of truth). Production env files
    are intentionally not symlinked.
 
-2. **Runs an optional setup hook** if `<repo>/.cmux/setup-worktree.sh` exists and
-   is executable. The hook runs in the new workspace's terminal (so its output is
-   visible), with cwd set to the feature worktree and these env vars exported:
-   `CMUX_FEATURE_SLUG`, `CMUX_FEATURE_BRANCH`, `CMUX_FEATURE_WORKTREE`,
+2. **Runs an optional `post-create` hook** if `<repo>/.cmux/post-create.sh` exists
+   and is executable. The hook runs in the new workspace's terminal (so its
+   output is visible), with cwd set to the feature worktree and these env vars
+   exported: `CMUX_FEATURE_SLUG`, `CMUX_FEATURE_BRANCH`, `CMUX_FEATURE_WORKTREE`,
    `CMUX_MAIN_WORKTREE`. Claude Code launches after the hook succeeds.
 
-   Example `.cmux/setup-worktree.sh`:
+   Example `.cmux/post-create.sh`:
 
    ```bash
    #!/usr/bin/env bash
@@ -86,9 +86,25 @@ automatically if missing.
    pnpm install --frozen-lockfile
    ```
 
-   Commit this file at `.cmux/setup-worktree.sh` (`chmod +x` it) so every worktree
-   gets the same setup. The plugin never auto-detects package managers — what
-   "setup" means is your project's call.
+`/cmux:finish-feature` and `/cmux:abandon-feature` look for a symmetric **`pre-destroy`
+hook** at `<repo>/.cmux/pre-destroy.sh`. If present and executable, it runs from
+the feature worktree (cwd = feature worktree) with the same `CMUX_FEATURE_*`
+env vars, *before* the worktree is removed. Use it to tear down state that
+`post-create.sh` created — stop a dev server, drop a temp database, prune
+containers. If the hook exits non-zero the cleanup is aborted and the worktree
+is left intact, so the user can fix the script and retry.
+
+Example `.cmux/pre-destroy.sh`:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+docker compose -p "cmux-${CMUX_FEATURE_SLUG}" down -v
+```
+
+Commit both files under `.cmux/` (`chmod +x` them) so every worktree gets the
+same lifecycle. The plugin never auto-detects package managers or services —
+what "setup" and "teardown" mean is your project's call.
 
 ## How Claude Uses cmux Automatically
 

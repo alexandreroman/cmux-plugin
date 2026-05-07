@@ -28,17 +28,32 @@ This command is destructive — uncommitted work and unmerged commits will be lo
 
 7. **Capture the cmux workspace ID** from `cmux identify --json`.
 
-8. **Force-remove the worktree** from the main repo (we are still in the worktree's cwd; that is fine because `git worktree remove` is run with `git -C <main>` and `--force`):
+8. **Run the optional `pre-destroy` hook.** If
+   `<feature-worktree-path>/.cmux/pre-destroy.sh` exists and is executable, run
+   it from the feature worktree (cwd = `<feature-worktree-path>`) with the same
+   env vars `/cmux:start-feature` exports:
+   - `CMUX_FEATURE_SLUG=<slug>`
+   - `CMUX_FEATURE_BRANCH=feature/<slug>`
+   - `CMUX_FEATURE_WORKTREE=<feature-worktree-path>`
+   - `CMUX_MAIN_WORKTREE=<main-worktree>`
+
+   The hook is the project's chance to tear down side-effect state created by
+   `post-create.sh` (stop a dev server, drop a temp database, prune containers,
+   etc.). If the hook exits non-zero, stop and report the failure — do not
+   remove the worktree. The user must fix the hook (or delete it) and re-run.
+   Skip silently if the hook is absent.
+
+9. **Force-remove the worktree** from the main repo (we are still in the worktree's cwd; that is fine because `git worktree remove` is run with `git -C <main>` and `--force`):
    ```bash
    git -C <main-worktree> worktree remove --force <feature-worktree-path>
    ```
 
-9. **Force-delete the local branch** (it is unmerged, so `-D` is required):
-   ```bash
-   git -C <main-worktree> branch -D feature/<slug>
-   ```
+10. **Force-delete the local branch** (it is unmerged, so `-D` is required):
+    ```bash
+    git -C <main-worktree> branch -D feature/<slug>
+    ```
 
-10. **Close this cmux workspace** (last — this kills the running Claude Code):
+11. **Close this cmux workspace** (last — this kills the running Claude Code):
     ```bash
     cmux close-workspace --workspace $CMUX_WORKSPACE_ID
     ```

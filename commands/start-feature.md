@@ -58,8 +58,8 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     to mention in the final report. Never overwrite an existing file in the
     worktree.
 
-11. **Run the optional setup hook in the new workspace.** If
-    `<repo-root>/.cmux/setup-worktree.sh` exists and is executable in the new
+11. **Run the optional `post-create` hook in the new workspace.** If
+    `<repo-root>/.cmux/post-create.sh` exists and is executable in the new
     worktree (it is, if it is committed and executable in the repo), chain it
     before `claude` in the workspace's startup command. The hook runs with the
     feature worktree as cwd and these env vars exported:
@@ -70,7 +70,9 @@ Follow these steps strictly. If any check fails, stop and report the reason.
 
     Do not auto-detect package managers or run `uv sync` / `npm install` /
     similar yourself. The hook is the project's responsibility — if it is not
-    present, just launch `claude`.
+    present, just launch `claude`. Symmetric counterpart: `.cmux/pre-destroy.sh`
+    is run by `/cmux:finish-feature` and `/cmux:abandon-feature` before the
+    worktree is removed.
 
 12. **Synthesize an initial brief for the new Claude session.** The new Claude
     will boot in the feature worktree with no memory of this conversation —
@@ -106,10 +108,10 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     # Pick the right startup line based on whether the setup hook exists.
     # The escaped \$(...) expands inside the *new* workspace's shell, not the
     # calling shell — so the temp file is read and removed there.
-    if [ -x "<repo-root>/.worktrees/<slug>/.cmux/setup-worktree.sh" ]; then
+    if [ -x "<repo-root>/.worktrees/<slug>/.cmux/post-create.sh" ]; then
       STARTUP="CMUX_FEATURE_SLUG=<slug> CMUX_FEATURE_BRANCH=feature/<slug> "
       STARTUP+="CMUX_FEATURE_WORKTREE=<wt> CMUX_MAIN_WORKTREE=<repo-root> "
-      STARTUP+="./.cmux/setup-worktree.sh && "
+      STARTUP+="./.cmux/post-create.sh && "
       STARTUP+="claude \"\$(cat $PROMPT_FILE && rm -f $PROMPT_FILE)\""
     else
       STARTUP="claude \"\$(cat $PROMPT_FILE && rm -f $PROMPT_FILE)\""
@@ -131,7 +133,7 @@ Follow these steps strictly. If any check fails, stop and report the reason.
 15. **Report to the user.** One short paragraph including:
     - Branch and worktree path
     - Which env files were symlinked (or "none")
-    - Whether the setup hook was found and chained, or skipped
+    - Whether the `post-create` hook was found and chained, or skipped
     - That the new cmux workspace is focused and Claude Code is now executing
       the brief you synthesized (or, in the placeholder case, that it is
       waiting on the user inside the new workspace)

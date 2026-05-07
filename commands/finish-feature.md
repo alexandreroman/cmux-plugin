@@ -34,24 +34,40 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
    ```
    - If the merge fails (conflicts), abort it: `git -C <main-worktree> merge --abort`. Report and stop. The user must resolve manually.
 
-9. **Remove the worktree.** Run from the main worktree so we are not removing our own cwd:
-   ```bash
-   git -C <main-worktree> worktree remove <feature-worktree-path>
-   ```
+9. **Run the optional `pre-destroy` hook.** If
+   `<feature-worktree-path>/.cmux/pre-destroy.sh` exists and is executable, run
+   it from the feature worktree (cwd = `<feature-worktree-path>`) with the same
+   env vars `/cmux:start-feature` exports:
+   - `CMUX_FEATURE_SLUG=<slug>`
+   - `CMUX_FEATURE_BRANCH=feature/<slug>`
+   - `CMUX_FEATURE_WORKTREE=<feature-worktree-path>`
+   - `CMUX_MAIN_WORKTREE=<main-worktree>`
 
-10. **Delete the local feature branch** (safe delete — it is now merged):
+   The hook is the project's chance to tear down side-effect state created by
+   `post-create.sh` (stop a dev server, drop a temp database, prune containers,
+   etc.). If the hook exits non-zero, stop and report the failure — do not
+   remove the worktree. The merge has already landed, so re-running the command
+   after the user fixes the hook will be a no-op for the merge step and will
+   continue to the cleanup. Skip silently if the hook is absent.
+
+10. **Remove the worktree.** Run from the main worktree so we are not removing our own cwd:
+    ```bash
+    git -C <main-worktree> worktree remove <feature-worktree-path>
+    ```
+
+11. **Delete the local feature branch** (safe delete — it is now merged):
     ```bash
     git -C <main-worktree> branch -d feature/<slug>
     ```
 
-11. **Notify the *main* workspace's sidebar** (find it via `cmux list-workspaces` if you can match by name; otherwise skip — the closing workspace's log will be discarded with it):
+12. **Notify the *main* workspace's sidebar** (find it via `cmux list-workspaces` if you can match by name; otherwise skip — the closing workspace's log will be discarded with it):
     ```bash
     cmux log --level success --source "claude" --workspace <main-workspace-id> \
       -- "Merged feature/<slug> → <base-branch>; worktree removed"
     ```
     If you cannot reliably identify the main workspace, skip this step rather than guessing.
 
-12. **Close this cmux workspace.** This terminates the running Claude Code; do it last.
+13. **Close this cmux workspace.** This terminates the running Claude Code; do it last.
     ```bash
     cmux close-workspace --workspace $CMUX_WORKSPACE_ID
     ```

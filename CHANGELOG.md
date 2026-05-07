@@ -7,6 +7,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- `pre-destroy` hook: `/cmux:finish-feature` and `/cmux:abandon-feature` now run an optional `<repo>/.cmux/pre-destroy.sh` from the feature worktree before removing it, with the same `CMUX_FEATURE_*` env vars `start-feature` exports. Symmetric counterpart to `post-create.sh` for tearing down state created at setup (stopping a dev server, dropping a temp DB, pruning containers). If the hook exits non-zero the worktree is left intact so the user can fix and retry.
+
+### Changed
+- Renamed the worktree setup hook from `<repo>/.cmux/setup-worktree.sh` to `<repo>/.cmux/post-create.sh`. Naming aligns with the devcontainer `postCreateCommand` idiom and pairs cleanly with the new `pre-destroy.sh` lifecycle hook. **Breaking**: existing repos must rename the file.
+
+---
+
 ## [1.1.3] — 2026-05-07
 
 ### Changed
