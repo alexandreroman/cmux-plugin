@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.3] — 2026-05-07
+
+### Changed
+- Rewrote the descriptions of `/cmux:start-feature`, `/cmux:finish-feature`, and `/cmux:abandon-feature` so Claude recognizes when to invoke them from natural phrasing — "new feature", "let's add X", "ship it", "merge it", "abandon", "scrap this" — rather than only when the slash command is typed verbatim. Also added a "Feature lifecycle — start / finish / abandon" section and a matching rule in the cmux-plugin skill, so the guidance is loaded automatically whenever Claude runs inside cmux.
+
+---
+
 ## [1.1.2] — 2026-05-06
 
 ### Changed
