@@ -40,18 +40,65 @@ Follow these steps strictly. If any check fails, stop and report the reason.
    git worktree add -b feature/<slug> <repo-root>/.worktrees/<slug> <base-branch>
    ```
 
-10. **Open a new cmux workspace and launch Claude Code in it.**
+10. **Symlink dev-time secret/config files from the main worktree** so the feature
+    worktree shares them. For each filename in this list, if it exists in
+    `<repo-root>/` and does *not* already exist in `<worktree>/`, create a relative
+    symlink in the worktree pointing back to the main worktree's file:
+    - `.env`
+    - `.env.local`
+    - `.env.development`
+    - `.env.development.local`
+    - `.envrc`
+
+    Use a relative target so the link survives if the parent dir is renamed:
     ```bash
+    ln -s ../../.env <repo-root>/.worktrees/<slug>/.env
+    ```
+    Skip silently if the source does not exist. Collect the list of linked files
+    to mention in the final report. Never overwrite an existing file in the
+    worktree.
+
+11. **Run the optional setup hook in the new workspace.** If
+    `<repo-root>/.cmux/setup-worktree.sh` exists and is executable in the new
+    worktree (it is, if it is committed and executable in the repo), chain it
+    before `claude` in the workspace's startup command. The hook runs with the
+    feature worktree as cwd and these env vars exported:
+    - `CMUX_FEATURE_SLUG=<slug>`
+    - `CMUX_FEATURE_BRANCH=feature/<slug>`
+    - `CMUX_FEATURE_WORKTREE=<repo-root>/.worktrees/<slug>`
+    - `CMUX_MAIN_WORKTREE=<repo-root>`
+
+    Do not auto-detect package managers or run `uv sync` / `npm install` /
+    similar yourself. The hook is the project's responsibility — if it is not
+    present, just launch `claude`.
+
+12. **Open a new cmux workspace and launch Claude Code in it.** Build the
+    `--command` so the setup hook (if any) runs first, then Claude Code starts.
+    Even if the hook fails, the user lands in the worktree's terminal.
+    ```bash
+    # If <repo-root>/.cmux/setup-worktree.sh exists in the new worktree:
+    SETUP_AND_CLAUDE='CMUX_FEATURE_SLUG=<slug> CMUX_FEATURE_BRANCH=feature/<slug> '\
+'CMUX_FEATURE_WORKTREE=<wt> CMUX_MAIN_WORKTREE=<repo-root> '\
+'./.cmux/setup-worktree.sh && claude'
+    # Otherwise:
+    SETUP_AND_CLAUDE='claude'
+
     cmux new-workspace \
       --name "<slug>" \
       --cwd "<repo-root>/.worktrees/<slug>" \
-      --command "claude" \
+      --command "$SETUP_AND_CLAUDE" \
       --focus true
     ```
 
-11. **Log a sidebar entry in the *current* workspace** (the main one — we are still here):
+13. **Log a sidebar entry in the *current* workspace** (the main one — we are
+    still here):
     ```bash
     cmux log --level success --source "claude" -- "Started feature/<slug> → .worktrees/<slug>"
     ```
 
-12. **Report to the user.** One short paragraph: branch name, worktree path, that the new cmux workspace is focused with Claude Code starting up. Suggest `/cmux:finish-feature` (merge + cleanup) or `/cmux:abandon-feature` (cleanup without merge) when done.
+14. **Report to the user.** One short paragraph including:
+    - Branch and worktree path
+    - Which env files were symlinked (or "none")
+    - Whether the setup hook was found and chained, or skipped
+    - That the new cmux workspace is focused with Claude Code starting up
+    - Suggestion: `/cmux:finish-feature` or `/cmux:abandon-feature` when done

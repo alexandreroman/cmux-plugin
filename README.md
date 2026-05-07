@@ -61,6 +61,35 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 `.worktrees/` should be in your repo's `.gitignore`. `/cmux:start-feature` adds it
 automatically if missing.
 
+#### Worktree environment setup
+
+`/cmux:start-feature` does two things to make the new worktree usable immediately:
+
+1. **Symlinks dev-time secret/config files** from the main worktree, when present:
+   `.env`, `.env.local`, `.env.development`, `.env.development.local`, `.envrc`.
+   Each link is relative, so they survive directory moves, and edits made in
+   either location propagate (one shared source of truth). Production env files
+   are intentionally not symlinked.
+
+2. **Runs an optional setup hook** if `<repo>/.cmux/setup-worktree.sh` exists and
+   is executable. The hook runs in the new workspace's terminal (so its output is
+   visible), with cwd set to the feature worktree and these env vars exported:
+   `CMUX_FEATURE_SLUG`, `CMUX_FEATURE_BRANCH`, `CMUX_FEATURE_WORKTREE`,
+   `CMUX_MAIN_WORKTREE`. Claude Code launches after the hook succeeds.
+
+   Example `.cmux/setup-worktree.sh`:
+
+   ```bash
+   #!/usr/bin/env bash
+   set -euo pipefail
+   uv sync
+   pnpm install --frozen-lockfile
+   ```
+
+   Commit this file at `.cmux/setup-worktree.sh` (`chmod +x` it) so every worktree
+   gets the same setup. The plugin never auto-detects package managers — what
+   "setup" means is your project's call.
+
 ## How Claude Uses cmux Automatically
 
 Claude detects cmux via the `CMUX_WORKSPACE_ID` environment variable. If it's not set (i.e. you're not in cmux), all cmux features are silently skipped — this plugin causes zero noise in other environments.
