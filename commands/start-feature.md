@@ -26,7 +26,7 @@ Follow these steps strictly. If any check fails, stop and report the reason.
 6. **Compute paths and names.**
    - Branch: `feature/<slug>`
    - Worktree path: `<repo-root>/.worktrees/<slug>`
-   - Workspace tab name: `<slug>` (cmux's `SessionStart` hook will rewrite it to `<repo>:<branch>` once Claude starts)
+   - Workspace tab name: `<repo-basename>-<slug>` (e.g. from `durable-money`, feature `2pc` → `durable-money-2pc`). `<repo-basename>` is the basename of `<repo-root>`. cmux's `SessionStart` hook produces the same format on every Claude start, so the tab name stays stable.
 
 7. **Pre-flight checks.** All must pass:
    - The branch must not already exist: `git show-ref --verify --quiet refs/heads/feature/<slug>` should fail (exit non-zero).
@@ -84,7 +84,7 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     SETUP_AND_CLAUDE='claude'
 
     cmux new-workspace \
-      --name "<slug>" \
+      --name "<repo-basename>-<slug>" \
       --cwd "<repo-root>/.worktrees/<slug>" \
       --command "$SETUP_AND_CLAUDE" \
       --focus true

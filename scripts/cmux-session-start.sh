@@ -12,11 +12,16 @@
 command -v cmux &>/dev/null                  || exit 0
 
 # ── Derive project name ────────────────────────────────────────────────────────
-# 1. Git repo root name  (most reliable across your multi-project setup)
-# 2. Current directory name  (fallback for non-git directories)
-GIT_ROOT=$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null)
-if [ -n "$GIT_ROOT" ]; then
-    PROJECT_NAME=$(basename "$GIT_ROOT")
+# Project name = basename of the *main* worktree's root, even when running
+# inside a linked worktree. We resolve git-common-dir (which always points at
+# the main repo's .git) and take its parent directory.
+GIT_DIR_LOCAL=$(git -C "$PWD" rev-parse --path-format=absolute --git-dir 2>/dev/null)
+GIT_DIR_COMMON_ABS=$(git -C "$PWD" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+GIT_BRANCH=$(git -C "$PWD" rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ -n "$GIT_DIR_COMMON_ABS" ]; then
+    MAIN_ROOT=$(dirname "$GIT_DIR_COMMON_ABS")
+    PROJECT_NAME=$(basename "$MAIN_ROOT")
 else
     PROJECT_NAME=$(basename "$PWD")
 fi
@@ -25,17 +30,15 @@ fi
 PROJECT_NAME=$(echo "$PROJECT_NAME" | tr -d '\n' | sed 's|/|-|g')
 [ -z "$PROJECT_NAME" ] && PROJECT_NAME="claude"
 
-# ── Get current branch ─────────────────────────────────────────────────────────
-GIT_BRANCH=$(git -C "$PWD" rev-parse --abbrev-ref HEAD 2>/dev/null)
-
 # ── Detect linked worktree ─────────────────────────────────────────────────────
 # In the main worktree, --git-dir and --git-common-dir resolve to the same path.
-# In a linked worktree they differ. Distinguish so parallel feature workspaces
-# created by /cmux:start-feature are visually distinct in the sidebar.
-GIT_DIR_LOCAL=$(git -C "$PWD" rev-parse --git-dir 2>/dev/null)
-GIT_DIR_COMMON=$(git -C "$PWD" rev-parse --git-common-dir 2>/dev/null)
-if [ -n "$GIT_DIR_LOCAL" ] && [ -n "$GIT_DIR_COMMON" ] && [ "$GIT_DIR_LOCAL" != "$GIT_DIR_COMMON" ] && [ -n "$GIT_BRANCH" ]; then
-    WORKSPACE_NAME="${PROJECT_NAME}:${GIT_BRANCH}"
+# In a linked worktree they differ. When inside a linked worktree, append the
+# branch leaf (last segment, e.g. `feature/2pc` → `2pc`) so parallel feature
+# workspaces are visually distinct in the sidebar — and match the naming
+# convention used by /cmux:start-feature.
+if [ -n "$GIT_DIR_LOCAL" ] && [ -n "$GIT_DIR_COMMON_ABS" ] && [ "$GIT_DIR_LOCAL" != "$GIT_DIR_COMMON_ABS" ] && [ -n "$GIT_BRANCH" ]; then
+    BRANCH_SLUG="${GIT_BRANCH##*/}"
+    WORKSPACE_NAME="${PROJECT_NAME}-${BRANCH_SLUG}"
 else
     WORKSPACE_NAME="$PROJECT_NAME"
 fi

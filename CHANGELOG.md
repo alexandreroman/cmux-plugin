@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.1] — 2026-05-06
+
+### Fixed
+- Workspace tab name in linked worktrees is now `<main-repo-basename>-<branch-leaf>` (e.g. `durable-money-2pc`) instead of `<linked-worktree-basename>:<full-branch>` (e.g. `2pc:feature/2pc`). Two underlying fixes: (1) `cmux-session-start.sh` now resolves the project name from the *main* worktree (via `git rev-parse --git-common-dir`) instead of the linked worktree's directory; (2) the separator changed from `:` to `-` and only the branch leaf is used (e.g. `feature/2pc` → `2pc`). `/cmux:start-feature` sets the same format up-front so the name stays stable across Claude restarts.
+
+---
+
 ## [1.1.0] — 2026-05-06
 
 ### Added
