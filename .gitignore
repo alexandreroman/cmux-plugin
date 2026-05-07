@@ -1,2 +1,5 @@
 # Scratch folder
 scratch/
+
+# Feature worktrees created by /cmux:start-feature
+.worktrees/

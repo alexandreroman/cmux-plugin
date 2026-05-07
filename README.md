@@ -10,8 +10,9 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 | **Sub-agent notifications** | `PostToolUse(Task)` hook fires a cmux notification when a sub-agent finishes. End-of-turn notifications are handled natively by cmux, so the plugin does not duplicate them |
 | **Sidebar progress** | The cmux skill teaches Claude to report long-running task progress as a live progress bar in the sidebar |
 | **Browser split automation** | Claude proactively opens a browser split when it needs to visually verify your dev server or debug UI |
+| **Feature worktree workflow** | `/cmux:start-feature`, `/cmux:finish-feature`, `/cmux:abandon-feature` — git worktree + isolated cmux workspace per feature, with a Claude Code instance per worktree |
 | **Superpowers integration** | When the [Superpowers plugin](https://claude.com/plugins/superpowers) triggers `using-git-worktrees`, Claude opens a new cmux workspace for the branch automatically |
-| **Slash commands** | `/cmux:status` and `/cmux:open-browser` for manual control |
+| **Slash commands** | `/cmux:status`, `/cmux:open-browser`, `/cmux:start-feature`, `/cmux:finish-feature`, `/cmux:abandon-feature` |
 
 ## Requirements
 
@@ -35,6 +36,30 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 |---|---|
 | `/cmux:status` | Show current workspace, panes, surfaces, and sidebar log |
 | `/cmux:open-browser [url]` | Open a browser split (defaults to `localhost:3000`) |
+| `/cmux:start-feature <name>` | Create a `feature/<slug>` worktree under `.worktrees/<slug>`, open a new cmux workspace, and launch Claude Code in it |
+| `/cmux:finish-feature` | Merge the feature branch into the base branch (fast-forward when possible), remove the worktree and local branch, close the cmux workspace. Run from the feature worktree |
+| `/cmux:abandon-feature` | Discard the feature: force-remove the worktree, force-delete the branch, close the cmux workspace. Asks for confirmation. Run from the feature worktree |
+
+### Feature workflow
+
+```bash
+# from the main repo workspace
+/cmux:start-feature auth-jwt
+#  → creates branch feature/auth-jwt
+#  → creates worktree at <repo>/.worktrees/auth-jwt
+#  → opens a new cmux workspace tab named "<repo>:feature/auth-jwt"
+#  → launches Claude Code there
+
+# work happens in the new workspace, commits accumulate on feature/auth-jwt
+# when done, from inside the feature workspace:
+
+/cmux:finish-feature      # merge + cleanup
+# or
+/cmux:abandon-feature     # discard + cleanup
+```
+
+`.worktrees/` should be in your repo's `.gitignore`. `/cmux:start-feature` adds it
+automatically if missing.
 
 ## How Claude Uses cmux Automatically
 
@@ -96,7 +121,10 @@ cmux-plugin/
 │   └── cmux-notify.sh         # Sends notifications when a sub-agent finishes
 ├── commands/
 │   ├── status.md              # /cmux:status
-│   └── open-browser.md        # /cmux:open-browser
+│   ├── open-browser.md        # /cmux:open-browser
+│   ├── start-feature.md       # /cmux:start-feature
+│   ├── finish-feature.md      # /cmux:finish-feature
+│   └── abandon-feature.md     # /cmux:abandon-feature
 ├── CHANGELOG.md
 └── README.md
 ```

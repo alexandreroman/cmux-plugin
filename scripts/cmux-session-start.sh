@@ -28,8 +28,20 @@ PROJECT_NAME=$(echo "$PROJECT_NAME" | tr -d '\n' | sed 's|/|-|g')
 # ── Get current branch ─────────────────────────────────────────────────────────
 GIT_BRANCH=$(git -C "$PWD" rev-parse --abbrev-ref HEAD 2>/dev/null)
 
+# ── Detect linked worktree ─────────────────────────────────────────────────────
+# In the main worktree, --git-dir and --git-common-dir resolve to the same path.
+# In a linked worktree they differ. Distinguish so parallel feature workspaces
+# created by /cmux:start-feature are visually distinct in the sidebar.
+GIT_DIR_LOCAL=$(git -C "$PWD" rev-parse --git-dir 2>/dev/null)
+GIT_DIR_COMMON=$(git -C "$PWD" rev-parse --git-common-dir 2>/dev/null)
+if [ -n "$GIT_DIR_LOCAL" ] && [ -n "$GIT_DIR_COMMON" ] && [ "$GIT_DIR_LOCAL" != "$GIT_DIR_COMMON" ] && [ -n "$GIT_BRANCH" ]; then
+    WORKSPACE_NAME="${PROJECT_NAME}:${GIT_BRANCH}"
+else
+    WORKSPACE_NAME="$PROJECT_NAME"
+fi
+
 # ── Rename the workspace tab ───────────────────────────────────────────────────
-cmux rename-workspace --workspace "$CMUX_WORKSPACE_ID" "$PROJECT_NAME" 2>/dev/null
+cmux rename-workspace --workspace "$CMUX_WORKSPACE_ID" "$WORKSPACE_NAME" 2>/dev/null
 
 # ── Sidebar status entry ───────────────────────────────────────────────────────
 if [ -n "$GIT_BRANCH" ]; then

@@ -7,6 +7,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] — 2026-05-06
+
+### Added
+- `/cmux:start-feature <name>` — creates a `feature/<slug>` git worktree under `<repo>/.worktrees/<slug>`, opens a new cmux workspace focused on it, and launches a Claude Code instance there. Adds `.worktrees/` to the repo's `.gitignore` if missing.
+- `/cmux:finish-feature` — run from inside a feature worktree: merges the feature branch into the base branch (plain `git merge`, fast-forward when possible), removes the worktree, deletes the local branch, and closes the cmux workspace. Refuses on dirty trees, merge conflicts, or wrong base branch.
+- `/cmux:abandon-feature` — destructive variant: shows the unmerged commits and uncommitted changes, asks for explicit confirmation, then force-removes the worktree, force-deletes the branch, and closes the cmux workspace.
+
+### Changed
+- `cmux-session-start.sh` now appends the branch to the workspace tab name when running inside a linked git worktree (e.g. `cmux-plugin:feature/auth-jwt`), so parallel feature workspaces are visually distinct in the sidebar. Behavior in the main worktree is unchanged.
+
+---
+
 ## [1.0.4] — 2026-05-05
 
 ### Fixed
