@@ -1,5 +1,5 @@
 ---
-description: Finish the current feature: merge the feature branch into the base branch, remove the worktree and local branch, and close the cmux workspace. Run this from inside a feature worktree created by `/cmux:start-feature`. Uses plain `git merge` (fast-forward when possible).
+description: PROACTIVE — invoke when work inside a feature worktree is complete and the user signals they want to ship it: "merge it", "ship it", "this is done", "wrap this up", "let's land this", or after tests/checks pass and they want to integrate. Only meaningful from inside a feature worktree created by `/cmux:start-feature` (linked worktree, on a `feature/*` branch). Suggest or run this instead of doing the merge by hand. Merges the feature branch into the base branch with plain `git merge` (fast-forward when possible), removes the worktree and local branch, and closes the cmux workspace.
 ---
 
 Finish the current feature: merge into the base branch and clean up.

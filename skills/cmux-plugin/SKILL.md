@@ -133,6 +133,37 @@ Sidebar log levels: `info` · `progress` · `success` · `warning` · `error`
 
 ---
 
+### Feature lifecycle — start / finish / abandon
+
+**Trigger — `/cmux:start-feature <slug>`:** As soon as the user describes a new
+feature or substantive new piece of work ("new feature", "let's add X", "build
+a Y", "implement Z", "I want to create…"), and you are in the main worktree of
+a cmux-enabled repo, prefer this command over editing the main worktree
+directly. It creates a `feature/<slug>` worktree under `.worktrees/<slug>` and
+opens a new cmux workspace named `<repo-basename>-<slug>` with Claude Code
+running inside it. Skip for trivial fixes, tiny doc tweaks, or when the user is
+already inside a feature worktree.
+
+**Trigger — `/cmux:finish-feature`:** When work inside a feature worktree is
+complete and the user signals integration ("merge it", "ship it", "this is
+done", "wrap up", or tests/checks pass and they want to land it). Merges into
+the base branch (fast-forward when possible), removes the worktree and branch,
+and closes this cmux workspace.
+
+**Trigger — `/cmux:abandon-feature`:** When the user wants to throw the feature
+away ("abandon", "discard", "scrap this", "start over", "this isn't working").
+Destructive — removes the worktree, force-deletes the branch, and closes the
+workspace. Always confirm via `AskUserQuestion` before running, even in auto
+mode.
+
+**Restraint:** All three commands assume the worktree layout produced by
+`/cmux:start-feature`. If the user is on a feature branch they made by hand
+(no `.worktrees/<slug>` worktree, or no matching cmux workspace), suggest the
+matching slash command but verify the preconditions in the command file before
+invoking — don't try to retrofit the cleanup logic onto an unrelated branch.
+
+---
+
 ### Notifications — genuine handoff points
 
 **Trigger:** A long sub-agent task has finished and needs human review.
@@ -221,6 +252,10 @@ cmux capabilities
 - **Always detect** before using. Never assume you're in cmux.
 - **New workspace** for parallel/isolated work only. Not for subtasks. Name as
   `<current-workspace-name>-<task-slug>` — never a bare task slug.
+- **Feature lifecycle commands** — when the user starts, finishes, or abandons
+  a feature, prefer `/cmux:start-feature`, `/cmux:finish-feature`, and
+  `/cmux:abandon-feature` over running `git worktree` / `git branch` /
+  `git merge` by hand.
 - **Browser split** for visual/DOM verification only. Close when done.
 - **Progress bar** for tasks over ~30 seconds.
 - **Notify** at genuine handoff points only — not after every step.

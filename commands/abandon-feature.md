@@ -1,5 +1,5 @@
 ---
-description: Abandon the current feature without merging — removes the worktree, force-deletes the feature branch, and closes the cmux workspace. Destructive: any uncommitted or unmerged commits are lost. Requires explicit confirmation. Run from inside a feature worktree.
+description: PROACTIVE — invoke when the user wants to throw away the current feature: "abandon", "discard this", "scrap it", "let's start over", "this isn't working", "forget this branch", "nuke this worktree". Only meaningful from inside a feature worktree (linked worktree, typically on a `feature/*` branch). Suggest or run this instead of manually deleting branches/worktrees. Destructive: removes the worktree, force-deletes the feature branch, and closes the cmux workspace; any uncommitted or unmerged commits are lost. Requires explicit confirmation via AskUserQuestion before destroying anything, even in auto mode.
 ---
 
 Abandon the current feature: discard all changes and clean up.

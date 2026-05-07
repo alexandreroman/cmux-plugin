@@ -1,5 +1,5 @@
 ---
-description: Start a new feature in an isolated cmux workspace. Creates a `feature/<slug>` git worktree under `.worktrees/<slug>`, opens it in a new cmux workspace, and launches Claude Code there. Argument: feature name (required, e.g. `auth-jwt`).
+description: PROACTIVE — invoke whenever the user is about to start work on a new feature, even without typing the slash command. Triggers on phrases like "new feature", "let's add X", "build a Y", "implement Z", "I want to create", "let's work on", "start a branch for", or any substantive new piece of work that deserves an isolated branch. When the user describes such work from the main worktree of a cmux-enabled repo, suggest this command (or run it directly in auto mode) before touching code, so the work happens in its own worktree and cmux workspace. Skip for quick one-off fixes, doc tweaks, or when already inside a feature worktree. Creates a `feature/<slug>` git worktree under `.worktrees/<slug>`, opens it in a new cmux workspace, and launches Claude Code there. Argument: feature name (required, e.g. `auth-jwt`).
 ---
 
 Start a new feature in an isolated cmux workspace.
