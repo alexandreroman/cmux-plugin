@@ -19,7 +19,7 @@ Follow these steps strictly. If any check fails, stop and report the reason.
    - `git rev-parse --git-common-dir` and `git rev-parse --git-dir` — if they differ, we are inside a linked worktree. Refuse: tell the user to run this from the main repo, not from another feature worktree.
 
 5. **Resolve the base branch** (the branch the new feature branches from):
-   - Try `git symbolic-ref --short refs/remotes/origin/HEAD` and strip the `origin/` prefix.
+   - Try `git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null` and strip the `origin/` prefix. (The redirect silences the harmless "not a symbolic ref" error on repos cloned without an `origin/HEAD` symref.)
    - Fallback: `main` if it exists locally, else `master` if it exists.
    - Last resort: the current `HEAD` branch name in the main worktree.
 
@@ -72,33 +72,67 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     similar yourself. The hook is the project's responsibility — if it is not
     present, just launch `claude`.
 
-12. **Open a new cmux workspace and launch Claude Code in it.** Build the
-    `--command` so the setup hook (if any) runs first, then Claude Code starts.
-    Even if the hook fails, the user lands in the worktree's terminal.
+12. **Synthesize an initial brief for the new Claude session.** The new Claude
+    will boot in the feature worktree with no memory of this conversation —
+    without a prompt it just sits idle. Write a self-contained instruction it
+    can act on immediately, drawn from the chat context that triggered this
+    command:
+    - State the goal and scope explicitly. Quote concrete constraints the user
+      mentioned (files to touch, modules involved, acceptance criteria).
+    - Tell the new Claude it is already in the feature worktree and should
+      commit progress as it goes, then report when done.
+    - Keep it under ~500 words. Action-oriented, not a recap of the chat.
+
+    If the chat context is thin (the slash command was invoked alone, with no
+    surrounding intent), fall back to a placeholder that defers to the user:
+    `"You are starting feature/<slug> in an isolated worktree. Ask the user what they want to build."`
+
+    Persist the brief to a temp file — embedding it inline through
+    `cmux new-workspace --command` is a quoting nightmare with multi-line
+    prompts and any user-supplied quotes:
     ```bash
-    # If <repo-root>/.cmux/setup-worktree.sh exists in the new worktree:
-    SETUP_AND_CLAUDE='CMUX_FEATURE_SLUG=<slug> CMUX_FEATURE_BRANCH=feature/<slug> '\
-'CMUX_FEATURE_WORKTREE=<wt> CMUX_MAIN_WORKTREE=<repo-root> '\
-'./.cmux/setup-worktree.sh && claude'
-    # Otherwise:
-    SETUP_AND_CLAUDE='claude'
+    PROMPT_FILE=$(mktemp -t cmux-feature-prompt.XXXXXX)
+    cat > "$PROMPT_FILE" <<'BRIEF_EOF'
+    <<<the brief, verbatim — heredoc preserves quotes and backslashes>>>
+    BRIEF_EOF
+    ```
+
+13. **Open a new cmux workspace and launch Claude Code with the brief.** The
+    startup command reads the brief from the temp file, removes it, and passes
+    the contents to `claude` as the initial prompt. The setup hook (if any)
+    still runs first, with the feature worktree as cwd. Even if the hook
+    fails, the user lands in the worktree's terminal.
+    ```bash
+    # Pick the right startup line based on whether the setup hook exists.
+    # The escaped \$(...) expands inside the *new* workspace's shell, not the
+    # calling shell — so the temp file is read and removed there.
+    if [ -x "<repo-root>/.worktrees/<slug>/.cmux/setup-worktree.sh" ]; then
+      STARTUP="CMUX_FEATURE_SLUG=<slug> CMUX_FEATURE_BRANCH=feature/<slug> "
+      STARTUP+="CMUX_FEATURE_WORKTREE=<wt> CMUX_MAIN_WORKTREE=<repo-root> "
+      STARTUP+="./.cmux/setup-worktree.sh && "
+      STARTUP+="claude \"\$(cat $PROMPT_FILE && rm -f $PROMPT_FILE)\""
+    else
+      STARTUP="claude \"\$(cat $PROMPT_FILE && rm -f $PROMPT_FILE)\""
+    fi
 
     cmux new-workspace \
       --name "<repo-basename>-<slug>" \
       --cwd "<repo-root>/.worktrees/<slug>" \
-      --command "$SETUP_AND_CLAUDE" \
+      --command "$STARTUP" \
       --focus true
     ```
 
-13. **Log a sidebar entry in the *current* workspace** (the main one — we are
+14. **Log a sidebar entry in the *current* workspace** (the main one — we are
     still here):
     ```bash
     cmux log --level success --source "claude" -- "Started feature/<slug> → .worktrees/<slug>"
     ```
 
-14. **Report to the user.** One short paragraph including:
+15. **Report to the user.** One short paragraph including:
     - Branch and worktree path
     - Which env files were symlinked (or "none")
     - Whether the setup hook was found and chained, or skipped
-    - That the new cmux workspace is focused with Claude Code starting up
+    - That the new cmux workspace is focused and Claude Code is now executing
+      the brief you synthesized (or, in the placeholder case, that it is
+      waiting on the user inside the new workspace)
     - Suggestion: `/cmux:finish-feature` or `/cmux:abandon-feature` when done
