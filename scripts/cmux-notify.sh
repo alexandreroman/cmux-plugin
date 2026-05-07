@@ -3,10 +3,9 @@
 # Routes Claude Code hook events to cmux notifications.
 #
 # - PostToolUse(Task): notifies when a sub-agent finishes
-# - Notification: intercepts Claude Code's idle notification.
-#   Registering this hook *replaces* the default OS notification, so
-#   the noisy "Claude is waiting for your input" can be suppressed
-#   silently while genuine permission prompts are forwarded to cmux.
+# - Notification: forwards any Claude Code notification message (permission
+#   prompts, idle events, etc.) to cmux as a notification. Registering this
+#   hook *replaces* the default OS notification.
 #
 # Stop events are intentionally not handled: cmux already shows a
 # native end-of-turn notification with the response content.
@@ -43,13 +42,7 @@ case "$EVENT_TYPE" in
         fi
         ;;
     "Notification")
-        # Idle "waiting for your input" is redundant with cmux's native
-        # end-of-turn notification — suppress it silently.
-        if [[ "$MESSAGE" == *"waiting for your input"* ]]; then
-            exit 0
-        fi
-        # Anything else (typically permission requests) is genuine —
-        # forward it to cmux so the user actually sees it.
+        # Forward every notification message to cmux uniformly.
         if [ -n "$MESSAGE" ]; then
             cmux notify \
                 --title "Claude Code" \

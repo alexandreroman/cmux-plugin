@@ -17,13 +17,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 - `cmux-session-start.sh` now appends the branch to the workspace tab name when running inside a linked git worktree (e.g. `cmux-plugin:feature/auth-jwt`), so parallel feature workspaces are visually distinct in the sidebar. Behavior in the main worktree is unchanged.
+- `cmux-notify.sh` now forwards every `Notification` event to cmux uniformly, with no per-message filtering.
 
 ---
 
 ## [1.0.4] — 2026-05-05
 
-### Fixed
-- Suppress Claude Code's redundant "Claude is waiting for your input" idle notification. Registering a `Notification` hook intercepts the event before Claude Code falls back to its default OS notification; the plugin filters out the idle message while still forwarding genuine messages (e.g. permission prompts) to cmux
+### Added
+- `Notification` hook (`cmux-notify.sh`) that forwards Claude Code notification events (permission prompts, idle events, etc.) to cmux as native notifications, replacing Claude Code's default OS notifications
 
 ---
 
