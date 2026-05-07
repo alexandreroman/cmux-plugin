@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.2] — 2026-05-06
+
+### Changed
+- `SKILL.md` now prescribes a workspace naming convention for *every* new workspace Claude opens (not just `/cmux:start-feature` worktrees): `<current-workspace-name>-<task-slug>`, set via `--name` at creation time. Example: from `durable-money`, opening a code review → `durable-money-code-review`. Previously Claude would sometimes use a bare task slug, losing the parent context in the sidebar.
+
+---
+
 ## [1.1.1] — 2026-05-06
 
 ### Fixed

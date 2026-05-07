@@ -49,13 +49,32 @@ Refer to them as `workspace:1`, `pane:2`, `surface:3` in CLI commands.
 **Trigger:** About to create a git worktree, launch an independent sub-agent on a
 separate branch, or start a task that is genuinely isolated from the current context.
 
-```bash
-# Create a new workspace (optionally with a command to run)
-cmux new-workspace
+**Naming convention — always:** `<current-workspace-name>-<task-slug>`. Prefix
+the new workspace with the current one so the parent context is obvious in the
+sidebar. Example: from workspace `durable-money`, opening a code review →
+`durable-money-code-review`. From `cmux-plugin`, a long migration task →
+`cmux-plugin-jpa-migration`. The task slug is short, lowercase, dash-separated.
 
-# Rename current workspace to match what you're about to do
-cmux rename-workspace --workspace "$CMUX_WORKSPACE_ID" "feature/auth"
+```bash
+# Resolve the *caller's* workspace name (the one this Claude session runs in —
+# not necessarily the one the user is focused on, which is what `*` marks).
+CURRENT_WS_REF=$(cmux identify --json | jq -r '.caller.workspace_ref')
+CURRENT_WS=$(cmux list-workspaces \
+  | sed -E 's/^[* ] +//' \
+  | awk -F'  +' -v ref="$CURRENT_WS_REF" '$1 == ref { print $2 }')
+
+# Create the new workspace with the prefixed name in one shot — pass --name
+# directly instead of renaming after creation.
+cmux new-workspace \
+  --name "${CURRENT_WS}-code-review" \
+  --command "claude 'Review the changes on main since <commit>...'" \
+  --focus true
 ```
+
+If `$CURRENT_WS` is empty (cmux not responding, parsing failed), fall back to
+`$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")`. Never use a
+bare task slug like just `code-review` — the parent context must be visible in
+the sidebar.
 
 **Restraint:** One workspace per isolated worktree or major parallel thread.
 Do NOT open a new workspace for every subtask within a single feature.
@@ -200,7 +219,8 @@ cmux capabilities
 ## Rules
 
 - **Always detect** before using. Never assume you're in cmux.
-- **New workspace** for parallel/isolated work only. Not for subtasks.
+- **New workspace** for parallel/isolated work only. Not for subtasks. Name as
+  `<current-workspace-name>-<task-slug>` — never a bare task slug.
 - **Browser split** for visual/DOM verification only. Close when done.
 - **Progress bar** for tasks over ~30 seconds.
 - **Notify** at genuine handoff points only — not after every step.
