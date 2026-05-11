@@ -76,8 +76,41 @@ If `$CURRENT_WS` is empty (cmux not responding, parsing failed), fall back to
 bare task slug like just `code-review` — the parent context must be visible in
 the sidebar.
 
+**`--cwd` semantics.** `--cwd <path>` sets the actual working directory of the
+spawned shell — not just a hint. Any script invoked from that shell with a
+relative path resolves it against `<path>`, not against the parent workspace's
+CWD. When the spawn prompt tells the new Claude to run things "from the repo
+root", make sure that's where `--cwd` points; otherwise feed absolute paths
+into the prompt so the spawned session can't get them wrong.
+
 **Restraint:** One workspace per isolated worktree or major parallel thread.
 Do NOT open a new workspace for every subtask within a single feature.
+
+---
+
+### Self-closing spawned workspace
+
+When a parent session opens a workspace that should live only as long as one
+task (processing a queue item, running a one-shot pipeline), the spawned
+Claude needs to close its own workspace at the end. Two rules:
+
+1. **Don't persist the workspace ref to a file inside `--cwd`.** Inside the
+   spawned shell the ref is already available: `$CMUX_WORKSPACE_ID` is the
+   UUID, and `cmux identify --json | jq -r .caller.workspace_ref` returns
+   the short form (`workspace:N`). Both forms are accepted by
+   `close-workspace`.
+2. **Close last.** `cmux close-workspace --workspace "$CMUX_WORKSPACE_ID"`
+   tears down the PTY, which kills Claude Code. Run it as the final
+   subprocess call after every other cleanup step, and treat its failure
+   as best-effort.
+
+Example end-of-task hook for a spawned session:
+
+```bash
+cmux log --level success --source "<skill>" "done"
+cmux clear-progress
+cmux close-workspace --workspace "$CMUX_WORKSPACE_ID" || true
+```
 
 ---
 

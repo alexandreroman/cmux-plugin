@@ -22,7 +22,7 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
 
 5. **Resolve the base branch** (same logic as `start-feature`): try `origin/HEAD`, then local `main`, then `master`. Reject if it equals the feature branch.
 
-6. **Capture the cmux workspace ID** from `cmux identify --json` (jq `.workspace_id` or `.workspace`). We will close it last.
+6. **Capture this workspace's ref.** Inside cmux, `$CMUX_WORKSPACE_ID` is already set to the UUID; if you need the short form (`workspace:N`), use `cmux identify --json | jq -r .caller.workspace_ref`. Either form is accepted by `close-workspace`. We will close it last (step 13).
 
 7. **Confirm the main worktree is on the base branch.**
    - `git -C <main-worktree> rev-parse --abbrev-ref HEAD` must equal the base branch.
