@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.2] — 2026-05-11
+
+### Fixed
+- `cmux-session-start.sh` no longer clobbers workspace names set via `cmux new-workspace --name`. The hook used to unconditionally rename the workspace to the repo basename on every session start, overwriting names chosen by callers (e.g. `/process-url` spawning `<parent>-process-url-<id>`). It now skips the rename when the workspace already has a non-default name.
+
+---
+
 ## [1.2.1] — 2026-05-11
 
 ### Changed
