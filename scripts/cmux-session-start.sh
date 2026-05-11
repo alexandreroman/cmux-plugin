@@ -44,7 +44,18 @@ else
 fi
 
 # ── Rename the workspace tab ───────────────────────────────────────────────────
-cmux rename-workspace --workspace "$CMUX_WORKSPACE_ID" "$WORKSPACE_NAME" 2>/dev/null
+# Respect names set by the caller via `cmux new-workspace --name <name>`. If the
+# workspace already has a customized name (e.g. `<parent>-process-url-<id>`),
+# don't clobber it with the default derived from the repo basename.
+CURRENT_NAME=$(cmux list-workspaces 2>/dev/null \
+    | sed -E 's/^[* ] +//' \
+    | awk -F'  +' -v ref="$CMUX_WORKSPACE_ID" '$1 == ref { print $2 }')
+
+if [ -n "$CURRENT_NAME" ] && [ "$CURRENT_NAME" != "$WORKSPACE_NAME" ] && [ "$CURRENT_NAME" != "claude" ]; then
+    : # custom name already set — leave it alone
+else
+    cmux rename-workspace --workspace "$CMUX_WORKSPACE_ID" "$WORKSPACE_NAME" 2>/dev/null
+fi
 
 # ── Sidebar status entry ───────────────────────────────────────────────────────
 if [ -n "$GIT_BRANCH" ]; then
