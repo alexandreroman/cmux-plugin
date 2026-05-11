@@ -45,11 +45,22 @@ fi
 
 # ── Rename the workspace tab ───────────────────────────────────────────────────
 # Respect names set by the caller via `cmux new-workspace --name <name>`. If the
-# workspace already has a customized name (e.g. `<parent>-process-url-<id>`),
-# don't clobber it with the default derived from the repo basename.
+# workspace already has a customized name (e.g. `<parent>-<id>` set by a wrapper
+# script), don't clobber it with the default derived from the repo basename.
+#
+# `$CMUX_WORKSPACE_ID` is a UUID, but `cmux list-workspaces` emits short refs
+# (workspace:N) in column 1. We can't awk-filter the listing by the UUID
+# directly — that's a silent miss that makes this hook always rename. Resolve
+# UUID → ref via `cmux identify --workspace <id>` first, then look up the title
+# by ref. The first `workspace_ref` in identify's JSON is the caller's (the
+# workspace argument we passed in).
+WORKSPACE_REF=$(cmux identify --workspace "$CMUX_WORKSPACE_ID" --json 2>/dev/null \
+    | grep -m1 '"workspace_ref"' \
+    | sed -E 's/.*"(workspace:[0-9]+)".*/\1/')
+
 CURRENT_NAME=$(cmux list-workspaces 2>/dev/null \
     | sed -E 's/^[* ] +//' \
-    | awk -F'  +' -v ref="$CMUX_WORKSPACE_ID" '$1 == ref { print $2 }')
+    | awk -F'  +' -v ref="$WORKSPACE_REF" '$1 == ref { print $2 }')
 
 if [ -n "$CURRENT_NAME" ] && [ "$CURRENT_NAME" != "$WORKSPACE_NAME" ] && [ "$CURRENT_NAME" != "claude" ]; then
     : # custom name already set — leave it alone

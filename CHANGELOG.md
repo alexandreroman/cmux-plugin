@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.3] — 2026-05-11
+
+### Fixed
+- `cmux-session-start.sh`: the 1.2.2 "skip rename when a custom name is set" guard never fired. It awked `cmux list-workspaces` for a row matching `$CMUX_WORKSPACE_ID`, but that env var is a UUID while the listing only emits short refs (`workspace:N`) in column 1 — so the lookup always returned empty and the hook still renamed every workspace on session start. Now resolves UUID → ref via `cmux identify --workspace <id>` before the lookup. Custom names set via `cmux new-workspace --name` are preserved as intended.
+
+---
+
 ## [1.2.2] — 2026-05-11
 
 ### Fixed
