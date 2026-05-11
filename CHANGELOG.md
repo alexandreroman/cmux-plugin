@@ -7,6 +7,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.1] — 2026-05-11
+
+### Changed
+- Documented `new-workspace --cwd <path>` semantics in `SKILL.md` and the robust pattern for self-closing spawned workspaces (read `$CMUX_WORKSPACE_ID` or `cmux identify --json | jq .caller.workspace_ref`, then close as a final best-effort step).
+- Fixed `commands/finish-feature.md` step 6: `cmux identify --json` exposes the workspace ref at `.caller.workspace_ref`, not `.workspace_id` / `.workspace`.
+- README now lists the `Notification` hook in the features table and corrects the `cmux-notify.sh` description to cover all forwarded events (not just sub-agent notifications).
+
+---
+
 ## [1.2.0] — 2026-05-07
 
 ### Added
