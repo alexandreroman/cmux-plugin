@@ -7,6 +7,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.4] — 2026-05-14
+
+### Fixed
+- `skills/cmux-plugin/SKILL.md`: detection snippet had the wrong default socket path. cmux 0.64.x stores its socket at `~/Library/Application Support/cmux/cmux.sock`, not `/tmp/cmux.sock`, so the `[ -S ... ]` check failed on machines where `CMUX_SOCKET_PATH` was unset — causing the skill to silently disable itself.
+- Browser split example used a `--direction` flag on `cmux browser open-split` that the CLI silently ignores (and which never appeared in `cmux browser --help`). Replaced with the supported `cmux new-pane --type browser --direction <dir> --url <url>` pattern when direction matters, plus an example showing how to capture the surface ref returned by `open-split`.
+
+### Changed
+- Restructured `skills/cmux-plugin/` to follow the [agentskills.io](https://agentskills.io/specification) progressive-disclosure pattern. `SKILL.md` shrinks from 271 → 149 lines by moving detailed sections into `references/`:
+  - `references/spawning-workspaces.md` — caller-prefix naming, `--cwd` semantics, self-closing spawned-workspace pattern.
+  - `references/browser-automation.md` — full browser command examples and cleanup.
+  - `references/feature-lifecycle.md` — trigger phrasing and preconditions for `/cmux:start-feature` / `finish-feature` / `abandon-feature`.
+  - `references/superpowers-integration.md` — Superpowers↔cmux action mapping.
+
+  Each reference is one level deep from `SKILL.md` and loaded on demand. The skill body stays focused on detection, triggers, and the rules — the procedural detail loads only when needed.
+- Replaced the bloated "Full CLI Reference" section with a short "Discoverability" pointer (`cmux --help`, `cmux <cmd> --help`, `cmux docs <topic>`, `cmux capabilities`). The full surface is one shell call away and was wasting context on every invocation.
+- Browser example now demonstrates capturing the surface ref from `open-split` output and cleaning up with `cmux close-surface` instead of just saying "close when done".
+
+---
+
 ## [1.2.3] — 2026-05-11
 
 ### Fixed
