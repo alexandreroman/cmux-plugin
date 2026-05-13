@@ -101,17 +101,18 @@ cmux notify --title "Claude Code" --body "Sub-agent finished: auth feature ready
 cmux trigger-flash    # Flash the pane ring for visual attention
 ```
 
-### Feature lifecycle slash commands
+### Isolated workspace lifecycle slash commands
 
-When the user starts, finishes, or abandons a feature, prefer the slash
-commands over running `git worktree` / `git branch` / `git merge` by hand:
+When the user starts, lands, or discards a piece of isolated work (a feature,
+a code review, a spike, a refactor), prefer the slash commands over running
+`git worktree` / `git branch` / `git merge` by hand:
 
-- `/cmux:start-feature <slug>` — new feature in an isolated worktree+workspace
-- `/cmux:finish-feature` — merge, remove worktree, close workspace
-- `/cmux:abandon-feature` — destructive; confirm first
+- `/cmux:new-workspace <slug>` — open an isolated worktree+workspace
+- `/cmux:close-workspace` — merge, remove worktree, close workspace
+- `/cmux:cancel-workspace` — destructive; confirm first
 
 For trigger phrasing, preconditions, and when to fall through to manual git
-plumbing, read [references/feature-lifecycle.md](references/feature-lifecycle.md).
+plumbing, read [references/workspace-lifecycle.md](references/workspace-lifecycle.md).
 
 ### Superpowers plugin
 

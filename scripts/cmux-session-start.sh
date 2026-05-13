@@ -33,9 +33,9 @@ PROJECT_NAME=$(echo "$PROJECT_NAME" | tr -d '\n' | sed 's|/|-|g')
 # ── Detect linked worktree ─────────────────────────────────────────────────────
 # In the main worktree, --git-dir and --git-common-dir resolve to the same path.
 # In a linked worktree they differ. When inside a linked worktree, append the
-# branch leaf (last segment, e.g. `feature/2pc` → `2pc`) so parallel feature
+# branch leaf (last segment, e.g. `feature/2pc` → `2pc`) so parallel isolated
 # workspaces are visually distinct in the sidebar — and match the naming
-# convention used by /cmux:start-feature.
+# convention used by /cmux:new-workspace.
 if [ -n "$GIT_DIR_LOCAL" ] && [ -n "$GIT_DIR_COMMON_ABS" ] && [ "$GIT_DIR_LOCAL" != "$GIT_DIR_COMMON_ABS" ] && [ -n "$GIT_BRANCH" ]; then
     BRANCH_SLUG="${GIT_BRANCH##*/}"
     WORKSPACE_NAME="${PROJECT_NAME}-${BRANCH_SLUG}"

@@ -11,9 +11,9 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 | **Notification forwarding** | `Notification` hook forwards Claude Code events (permission prompts, idle pings, etc.) to cmux as native notifications, replacing the default OS pop-ups |
 | **Sidebar progress** | The cmux skill teaches Claude to report long-running task progress as a live progress bar in the sidebar |
 | **Browser split automation** | Claude proactively opens a browser split when it needs to visually verify your dev server or debug UI |
-| **Feature worktree workflow** | `/cmux:start-feature`, `/cmux:finish-feature`, `/cmux:abandon-feature` — git worktree + isolated cmux workspace per feature, with a Claude Code instance per worktree |
+| **Isolated workspace workflow** | `/cmux:new-workspace`, `/cmux:close-workspace`, `/cmux:cancel-workspace` — git worktree + isolated cmux workspace per piece of work (feature, code review, spike, refactor), with a Claude Code instance per worktree |
 | **Superpowers integration** | When the [Superpowers plugin](https://claude.com/plugins/superpowers) triggers `using-git-worktrees`, Claude opens a new cmux workspace for the branch automatically |
-| **Slash commands** | `/cmux:status`, `/cmux:open-browser`, `/cmux:start-feature`, `/cmux:finish-feature`, `/cmux:abandon-feature` |
+| **Slash commands** | `/cmux:status`, `/cmux:open-browser`, `/cmux:new-workspace`, `/cmux:close-workspace`, `/cmux:cancel-workspace` |
 
 ## Requirements
 
@@ -37,34 +37,39 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 |---|---|
 | `/cmux:status` | Show current workspace, panes, surfaces, and sidebar log |
 | `/cmux:open-browser [url]` | Open a browser split (defaults to `localhost:3000`) |
-| `/cmux:start-feature <name>` | Create a `feature/<slug>` worktree under `.worktrees/<slug>`, open a new cmux workspace, and launch Claude Code in it |
-| `/cmux:finish-feature` | Merge the feature branch into the base branch (fast-forward when possible), remove the worktree and local branch, close the cmux workspace. Run from the feature worktree |
-| `/cmux:abandon-feature` | Discard the feature: force-remove the worktree, force-delete the branch, close the cmux workspace. Asks for confirmation. Run from the feature worktree |
+| `/cmux:new-workspace <slug>` | Create a `feature/<slug>` worktree under `.worktrees/<slug>`, open a new cmux workspace, and launch Claude Code in it |
+| `/cmux:close-workspace` | Merge the workspace branch into the base branch (fast-forward when possible), remove the worktree and local branch, close the cmux workspace. Run from the isolated worktree |
+| `/cmux:cancel-workspace` | Discard the workspace: force-remove the worktree, force-delete the branch, close the cmux workspace. Asks for confirmation. Run from the isolated worktree |
 
-### Feature workflow
+### Isolated workspace workflow
 
 ```bash
 # from the main repo workspace
-/cmux:start-feature auth-jwt
+/cmux:new-workspace auth-jwt
 #  → creates branch feature/auth-jwt
 #  → creates worktree at <repo>/.worktrees/auth-jwt
-#  → opens a new cmux workspace tab named "<repo>:feature/auth-jwt"
+#  → opens a new cmux workspace tab named "<repo>-auth-jwt"
 #  → launches Claude Code there
 
 # work happens in the new workspace, commits accumulate on feature/auth-jwt
-# when done, from inside the feature workspace:
+# when done, from inside the isolated workspace:
 
-/cmux:finish-feature      # merge + cleanup
+/cmux:close-workspace     # merge + cleanup
 # or
-/cmux:abandon-feature     # discard + cleanup
+/cmux:cancel-workspace    # discard + cleanup
 ```
 
-`.worktrees/` should be in your repo's `.gitignore`. `/cmux:start-feature` adds it
+The slug can describe any kind of isolated work — `auth-jwt` for a feature,
+`review-pr-42` for a code review, `spike-graphql` for an experiment. The
+underlying branch is always `feature/<slug>` regardless (a short-lived
+branch-name convention; not a statement about the kind of work).
+
+`.worktrees/` should be in your repo's `.gitignore`. `/cmux:new-workspace` adds it
 automatically if missing.
 
 #### Worktree lifecycle hooks
 
-`/cmux:start-feature` does two things to make the new worktree usable immediately:
+`/cmux:new-workspace` does two things to make the new worktree usable immediately:
 
 1. **Symlinks dev-time secret/config files** from the main worktree, when present:
    `.env`, `.env.local`, `.env.development`, `.env.development.local`, `.envrc`.
@@ -74,9 +79,10 @@ automatically if missing.
 
 2. **Runs an optional `post-create` hook** if `<repo>/.cmux/post-create.sh` exists
    and is executable. The hook runs in the new workspace's terminal (so its
-   output is visible), with cwd set to the feature worktree and these env vars
+   output is visible), with cwd set to the new worktree and these env vars
    exported: `CMUX_FEATURE_SLUG`, `CMUX_FEATURE_BRANCH`, `CMUX_FEATURE_WORKTREE`,
-   `CMUX_MAIN_WORKTREE`. Claude Code launches after the hook succeeds.
+   `CMUX_MAIN_WORKTREE` (names kept stable for backwards compatibility with
+   existing project hook scripts). Claude Code launches after the hook succeeds.
 
    Example `.cmux/post-create.sh`:
 
@@ -87,9 +93,9 @@ automatically if missing.
    pnpm install --frozen-lockfile
    ```
 
-`/cmux:finish-feature` and `/cmux:abandon-feature` look for a symmetric **`pre-destroy`
+`/cmux:close-workspace` and `/cmux:cancel-workspace` look for a symmetric **`pre-destroy`
 hook** at `<repo>/.cmux/pre-destroy.sh`. If present and executable, it runs from
-the feature worktree (cwd = feature worktree) with the same `CMUX_FEATURE_*`
+the isolated worktree (cwd = the worktree) with the same `CMUX_FEATURE_*`
 env vars, *before* the worktree is removed. Use it to tear down state that
 `post-create.sh` created — stop a dev server, drop a temp database, prune
 containers. If the hook exits non-zero the cleanup is aborted and the worktree
@@ -160,7 +166,7 @@ cmux-plugin/
 ├── skills/
 │   └── cmux/
 │       ├── SKILL.md           # Core skill — teaches Claude when/how to use cmux
-│       └── references/        # On-demand details (browser, feature lifecycle, ...)
+│       └── references/        # On-demand details (browser, workspace lifecycle, ...)
 ├── hooks/
 │   └── hooks.json             # Hook event declarations
 ├── scripts/
@@ -169,9 +175,9 @@ cmux-plugin/
 ├── commands/
 │   ├── status.md              # /cmux:status
 │   ├── open-browser.md        # /cmux:open-browser
-│   ├── start-feature.md       # /cmux:start-feature
-│   ├── finish-feature.md      # /cmux:finish-feature
-│   └── abandon-feature.md     # /cmux:abandon-feature
+│   ├── new-workspace.md       # /cmux:new-workspace
+│   ├── close-workspace.md     # /cmux:close-workspace
+│   └── cancel-workspace.md    # /cmux:cancel-workspace
 ├── CHANGELOG.md
 └── README.md
 ```

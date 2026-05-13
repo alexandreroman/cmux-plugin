@@ -1,8 +1,8 @@
 ---
-description: PROACTIVE — invoke when work inside a feature worktree is complete and the user signals they want to ship it: "merge it", "ship it", "this is done", "wrap this up", "let's land this", or after tests/checks pass and they want to integrate. Only meaningful from inside a feature worktree created by `/cmux:start-feature` (linked worktree, on a `feature/*` branch). Suggest or run this instead of doing the merge by hand. Merges the feature branch into the base branch with plain `git merge` (fast-forward when possible), removes the worktree and local branch, and closes the cmux workspace.
+description: PROACTIVE — land the work in an isolated cmux workspace: merge its branch into the base branch (fast-forward when possible), remove the worktree and local branch, and close the cmux workspace. Triggers on "merge it", "ship it", "this is done", "wrap this up", "let's land this", "review approved", or when tests/checks pass and the user wants to integrate. Run from inside an isolated worktree created by `/cmux:new-workspace`; suggest or run this instead of doing the merge by hand.
 ---
 
-Finish the current feature: merge into the base branch and clean up.
+Close the current isolated workspace: merge its branch into the base branch and clean up.
 
 Follow these steps strictly. If any check fails, stop and report the reason — do not attempt to recover destructively.
 
@@ -10,17 +10,17 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
 
 2. **Confirm we are inside a linked worktree** (not the main repo):
    - `git rev-parse --git-common-dir` and `git rev-parse --git-dir` must differ.
-   - If we are in the main worktree, refuse and tell the user this command must be run from a feature worktree.
+   - If we are in the main worktree, refuse and tell the user this command must be run from an isolated worktree.
 
-3. **Identify the feature branch and main worktree.**
-   - Feature branch: `git rev-parse --abbrev-ref HEAD`. Reject if it is `HEAD` (detached) or empty.
-   - Feature worktree path: `git rev-parse --show-toplevel`.
+3. **Identify the workspace branch and main worktree.**
+   - Branch: `git rev-parse --abbrev-ref HEAD`. Reject if it is `HEAD` (detached) or empty.
+   - Isolated worktree path: `git rev-parse --show-toplevel`.
    - Main worktree path: parse `git worktree list --porcelain` — the first entry whose `worktree` line is not the current one and is not marked `bare`. Equivalently, dirname of `git rev-parse --git-common-dir` (without the trailing `/.git`).
 
 4. **Verify the worktree is clean.**
    - `git status --porcelain` must be empty. If not, list the dirty paths and stop. Tell the user to commit, stash, or discard before retrying.
 
-5. **Resolve the base branch** (same logic as `start-feature`): try `origin/HEAD`, then local `main`, then `master`. Reject if it equals the feature branch.
+5. **Resolve the base branch** (same logic as `new-workspace`): try `origin/HEAD`, then local `main`, then `master`. Reject if it equals the workspace branch.
 
 6. **Capture this workspace's ref.** Inside cmux, `$CMUX_WORKSPACE_ID` is already set to the UUID; if you need the short form (`workspace:N`), use `cmux identify --json | jq -r .caller.workspace_ref`. Either form is accepted by `close-workspace`. We will close it last (step 13).
 
@@ -28,19 +28,20 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
    - `git -C <main-worktree> rev-parse --abbrev-ref HEAD` must equal the base branch.
    - If not, refuse: tell the user to switch the main worktree to `<base-branch>` first. Do not silently switch it.
 
-8. **Merge the feature branch into the base branch** (from the main worktree, default fast-forward behavior):
+8. **Merge the workspace branch into the base branch** (from the main worktree, default fast-forward behavior):
    ```bash
    git -C <main-worktree> merge feature/<slug>
    ```
    - If the merge fails (conflicts), abort it: `git -C <main-worktree> merge --abort`. Report and stop. The user must resolve manually.
 
 9. **Run the optional `pre-destroy` hook.** If
-   `<feature-worktree-path>/.cmux/pre-destroy.sh` exists and is executable, run
-   it from the feature worktree (cwd = `<feature-worktree-path>`) with the same
-   env vars `/cmux:start-feature` exports:
+   `<worktree-path>/.cmux/pre-destroy.sh` exists and is executable, run
+   it from the worktree (cwd = `<worktree-path>`) with the same env vars
+   `/cmux:new-workspace` exports (names kept stable for backwards compatibility
+   with existing project hook scripts):
    - `CMUX_FEATURE_SLUG=<slug>`
    - `CMUX_FEATURE_BRANCH=feature/<slug>`
-   - `CMUX_FEATURE_WORKTREE=<feature-worktree-path>`
+   - `CMUX_FEATURE_WORKTREE=<worktree-path>`
    - `CMUX_MAIN_WORKTREE=<main-worktree>`
 
    The hook is the project's chance to tear down side-effect state created by
@@ -52,10 +53,10 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
 
 10. **Remove the worktree.** Run from the main worktree so we are not removing our own cwd:
     ```bash
-    git -C <main-worktree> worktree remove <feature-worktree-path>
+    git -C <main-worktree> worktree remove <worktree-path>
     ```
 
-11. **Delete the local feature branch** (safe delete — it is now merged):
+11. **Delete the local branch** (safe delete — it is now merged):
     ```bash
     git -C <main-worktree> branch -d feature/<slug>
     ```

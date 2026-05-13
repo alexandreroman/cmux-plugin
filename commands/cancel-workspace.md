@@ -1,8 +1,8 @@
 ---
-description: PROACTIVE — invoke when the user wants to throw away the current feature: "abandon", "discard this", "scrap it", "let's start over", "this isn't working", "forget this branch", "nuke this worktree". Only meaningful from inside a feature worktree (linked worktree, typically on a `feature/*` branch). Suggest or run this instead of manually deleting branches/worktrees. Destructive: removes the worktree, force-deletes the feature branch, and closes the cmux workspace; any uncommitted or unmerged commits are lost. Requires explicit confirmation via AskUserQuestion before destroying anything, even in auto mode.
+description: PROACTIVE — destructively discard an isolated cmux workspace: force-remove the worktree, force-delete the branch, and close the cmux workspace. Any uncommitted or unmerged work is lost. Triggers on "abandon", "discard this", "scrap it", "let's start over", "this isn't working", "forget this branch", "nuke this workspace". Run from inside an isolated worktree; suggest or run this instead of manually deleting branches/worktrees. Always asks for explicit confirmation via AskUserQuestion, even in auto mode.
 ---
 
-Abandon the current feature: discard all changes and clean up.
+Cancel the current isolated workspace: discard all changes and clean up.
 
 This command is destructive — uncommitted work and unmerged commits will be lost. You MUST get explicit user confirmation before running steps 7+.
 
@@ -10,12 +10,12 @@ This command is destructive — uncommitted work and unmerged commits will be lo
 
 2. **Confirm we are inside a linked worktree** (not the main repo): `git rev-parse --git-common-dir` and `git rev-parse --git-dir` must differ. If we are in the main worktree, refuse.
 
-3. **Identify the feature branch and main worktree** (same as `finish-feature`):
-   - Feature branch: `git rev-parse --abbrev-ref HEAD`.
-   - Feature worktree path: `git rev-parse --show-toplevel`.
+3. **Identify the workspace branch and main worktree** (same as `close-workspace`):
+   - Branch: `git rev-parse --abbrev-ref HEAD`.
+   - Isolated worktree path: `git rev-parse --show-toplevel`.
    - Main worktree path: from `git worktree list --porcelain` (or dirname of `git rev-parse --git-common-dir` without `/.git`).
 
-4. **Resolve the base branch** (same logic as `start-feature`).
+4. **Resolve the base branch** (same logic as `new-workspace`).
 
 5. **Show the user exactly what will be lost:**
    - Uncommitted changes: `git status --short` (echo as a fenced block).
@@ -29,12 +29,13 @@ This command is destructive — uncommitted work and unmerged commits will be lo
 7. **Capture the cmux workspace ID** from `cmux identify --json`.
 
 8. **Run the optional `pre-destroy` hook.** If
-   `<feature-worktree-path>/.cmux/pre-destroy.sh` exists and is executable, run
-   it from the feature worktree (cwd = `<feature-worktree-path>`) with the same
-   env vars `/cmux:start-feature` exports:
+   `<worktree-path>/.cmux/pre-destroy.sh` exists and is executable, run
+   it from the worktree (cwd = `<worktree-path>`) with the same env vars
+   `/cmux:new-workspace` exports (names kept stable for backwards compatibility
+   with existing project hook scripts):
    - `CMUX_FEATURE_SLUG=<slug>`
    - `CMUX_FEATURE_BRANCH=feature/<slug>`
-   - `CMUX_FEATURE_WORKTREE=<feature-worktree-path>`
+   - `CMUX_FEATURE_WORKTREE=<worktree-path>`
    - `CMUX_MAIN_WORKTREE=<main-worktree>`
 
    The hook is the project's chance to tear down side-effect state created by
@@ -45,7 +46,7 @@ This command is destructive — uncommitted work and unmerged commits will be lo
 
 9. **Force-remove the worktree** from the main repo (we are still in the worktree's cwd; that is fine because `git worktree remove` is run with `git -C <main>` and `--force`):
    ```bash
-   git -C <main-worktree> worktree remove --force <feature-worktree-path>
+   git -C <main-worktree> worktree remove --force <worktree-path>
    ```
 
 10. **Force-delete the local branch** (it is unmerged, so `-D` is required):

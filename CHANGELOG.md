@@ -16,6 +16,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   - Skill folder on disk: `skills/cmux/` (was `skills/cmux-plugin/`).
 
   The GitHub repository URL is unchanged.
+- **Renamed the feature-lifecycle slash commands and reframed them around isolated workspaces.** The behavior is unchanged (still creates/merges/discards a `feature/<slug>` worktree under `.worktrees/<slug>`), but the vocabulary now covers any isolated piece of work — a feature, a code review, a spike, a long refactor — instead of presuming "feature":
+  - `/cmux:start-feature` → `/cmux:new-workspace`
+  - `/cmux:finish-feature` → `/cmux:close-workspace`
+  - `/cmux:abandon-feature` → `/cmux:cancel-workspace`
+
+  Command files, descriptions, `references/feature-lifecycle.md` (→ `workspace-lifecycle.md`), the SKILL.md trigger section, and the README are rewritten with the broader framing. The `CMUX_FEATURE_*` env vars exposed to `post-create.sh` / `pre-destroy.sh` keep their names so existing project hook scripts continue to work. The `feature/<slug>` branch prefix is retained as a short-lived-branch convention regardless of what kind of work the workspace hosts.
 
 ---
 
