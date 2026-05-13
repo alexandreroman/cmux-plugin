@@ -26,8 +26,8 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 
 ```bash
 # In Claude Code
-/plugin marketplace add hopchouinard/patchoutech-plugins
-/plugin install cmux@patchoutech-plugins
+/plugin marketplace add alexandreroman/cc-plugins
+/plugin install cmux@cc-plugins
 /reload-plugins
 ```
 
