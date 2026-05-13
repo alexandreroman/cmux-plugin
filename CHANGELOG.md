@@ -7,6 +7,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.0] — 2026-05-14
+
+### Changed (breaking)
+- **Renamed the plugin from `cmux-plugin` to `cmux`.** The install command, skill name, and skill folder all use the shorter name; existing users must reinstall:
+  - Install: `/plugin install cmux@patchoutech-plugins` (was `cmux-plugin@patchoutech-plugins`).
+  - Skill ID inside the SessionStart hook context: `cmux:cmux` (was `cmux-plugin:cmux-plugin`). Update the JSON snippet in `~/.claude/settings.json` accordingly.
+  - Skill folder on disk: `skills/cmux/` (was `skills/cmux-plugin/`).
+
+  The GitHub repository URL is unchanged.
+
+---
+
 ## [1.2.4] — 2026-05-14
 
 ### Fixed

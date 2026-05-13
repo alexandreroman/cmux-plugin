@@ -8,7 +8,7 @@ The user provided this feature name (raw, may need sanitizing): `$ARGUMENTS`
 
 Follow these steps strictly. If any check fails, stop and report the reason.
 
-1. **Verify cmux is available.** Run the detection block from the cmux-plugin skill (`CMUX_WORKSPACE_ID`, socket, `cmux` binary). If not inside cmux, explain that this command requires cmux and stop.
+1. **Verify cmux is available.** Run the detection block from the cmux skill (`CMUX_WORKSPACE_ID`, socket, `cmux` binary). If not inside cmux, explain that this command requires cmux and stop.
 
 2. **Validate the argument.** If `$ARGUMENTS` is empty or only whitespace, ask the user for a feature name and stop.
 

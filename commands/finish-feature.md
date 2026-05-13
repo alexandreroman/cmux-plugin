@@ -6,7 +6,7 @@ Finish the current feature: merge into the base branch and clean up.
 
 Follow these steps strictly. If any check fails, stop and report the reason — do not attempt to recover destructively.
 
-1. **Verify cmux is available** (same detection as in the cmux-plugin skill). If not inside cmux, stop.
+1. **Verify cmux is available** (same detection as in the cmux skill). If not inside cmux, stop.
 
 2. **Confirm we are inside a linked worktree** (not the main repo):
    - `git rev-parse --git-common-dir` and `git rev-parse --git-dir` must differ.

@@ -27,7 +27,7 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 ```bash
 # In Claude Code
 /plugin marketplace add hopchouinard/patchoutech-plugins
-/plugin install cmux-plugin@patchoutech-plugins
+/plugin install cmux@patchoutech-plugins
 /reload-plugins
 ```
 
@@ -122,7 +122,7 @@ When inside cmux, Claude will:
 
 To ensure Claude actually triggers the cmux skill before every relevant action — especially before dispatching parallel sub-agents, where other skills can take precedence — add a `SessionStart` hook to `~/.claude/settings.json`. It injects an explicit reminder whenever `CMUX_WORKSPACE_ID` is set.
 
-The simplest way is to ask Claude to install it for you — e.g. *"install the cmux-plugin SessionStart hook in my user settings"*. Claude will merge the snippet below into `~/.claude/settings.json` (preserving your existing config), validate the JSON, and pipe-test the command. Otherwise, paste it in by hand:
+The simplest way is to ask Claude to install it for you — e.g. *"install the cmux SessionStart hook in my user settings"*. Claude will merge the snippet below into `~/.claude/settings.json` (preserving your existing config), validate the JSON, and pipe-test the command. Otherwise, paste it in by hand:
 
 ```json
 {
@@ -132,7 +132,7 @@ The simplest way is to ask Claude to install it for you — e.g. *"install the c
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -n \"$CMUX_WORKSPACE_ID\" ]; then jq -n '{hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:\"You are running inside cmux (CMUX_WORKSPACE_ID is set). You MUST invoke the cmux-plugin:cmux-plugin skill via the Skill tool BEFORE: dispatching parallel sub-agents (Agent tool), launching long-running tasks (>30s), browser-based testing, or any work that benefits from sidebar progress reporting and attention notifications. Do this proactively without waiting for the user to ask.\"}}'; fi"
+            "command": "if [ -n \"$CMUX_WORKSPACE_ID\" ]; then jq -n '{hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:\"You are running inside cmux (CMUX_WORKSPACE_ID is set). You MUST invoke the cmux:cmux skill via the Skill tool BEFORE: dispatching parallel sub-agents (Agent tool), launching long-running tasks (>30s), browser-based testing, or any work that benefits from sidebar progress reporting and attention notifications. Do this proactively without waiting for the user to ask.\"}}'; fi"
           }
         ]
       }
@@ -158,8 +158,9 @@ cmux-plugin/
 ├── .claude-plugin/
 │   └── plugin.json            # Plugin manifest
 ├── skills/
-│   └── cmux-plugin/
-│       └── SKILL.md           # Core skill — teaches Claude when/how to use cmux
+│   └── cmux/
+│       ├── SKILL.md           # Core skill — teaches Claude when/how to use cmux
+│       └── references/        # On-demand details (browser, feature lifecycle, ...)
 ├── hooks/
 │   └── hooks.json             # Hook event declarations
 ├── scripts/

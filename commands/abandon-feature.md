@@ -6,7 +6,7 @@ Abandon the current feature: discard all changes and clean up.
 
 This command is destructive — uncommitted work and unmerged commits will be lost. You MUST get explicit user confirmation before running steps 7+.
 
-1. **Verify cmux is available** (same detection as in the cmux-plugin skill). If not inside cmux, stop.
+1. **Verify cmux is available** (same detection as in the cmux skill). If not inside cmux, stop.
 
 2. **Confirm we are inside a linked worktree** (not the main repo): `git rev-parse --git-common-dir` and `git rev-parse --git-dir` must differ. If we are in the main worktree, refuse.
 
