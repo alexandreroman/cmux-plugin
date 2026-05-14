@@ -114,6 +114,14 @@ a code review, a spike, a refactor), prefer the slash commands over running
 For trigger phrasing, preconditions, and when to fall through to manual git
 plumbing, read [references/workspace-lifecycle.md](references/workspace-lifecycle.md).
 
+Projects can also install optional **per-worktree lifecycle hooks**
+(`.cmux/post-create.sh` after creation, `.cmux/pre-destroy.sh` before
+removal) to bootstrap or tear down state tied to an isolated worktree —
+installing deps, starting containers, dropping temp databases, etc. For
+the file layout, env vars (`CMUX_FEATURE_SLUG`, `CMUX_FEATURE_BRANCH`,
+`CMUX_FEATURE_WORKTREE`, `CMUX_MAIN_WORKTREE`), and failure semantics,
+read [references/worktree-lifecycle-hooks.md](references/worktree-lifecycle-hooks.md).
+
 ### Superpowers plugin
 
 When the Superpowers plugin is active, certain of its workflows pair
