@@ -41,7 +41,7 @@ cmux browser "$BROWSER_SURFACE" errors list                   # Page errors
 Other useful subcommands: `goto|navigate`, `back|forward|reload`, `dblclick`,
 `hover`, `press`, `select`, `scroll`, `is visible|enabled|checked`,
 `find role|text|…`, `dialog accept|dismiss`, `download`, `cookies`, `storage`,
-`tab`, `viewport`, `geolocation`, `offline`, `network`.
+`tab`, `frame`, `highlight`, `state save|load`.
 
 ## Cleanup
 

@@ -122,6 +122,28 @@ the file layout, env vars (`CMUX_FEATURE_SLUG`, `CMUX_FEATURE_BRANCH`,
 `CMUX_FEATURE_WORKTREE`, `CMUX_MAIN_WORKTREE`), and failure semantics,
 read [references/worktree-lifecycle-hooks.md](references/worktree-lifecycle-hooks.md).
 
+### Open files or URLs — surface an artifact to the user
+
+**Trigger:** you've produced something the user should look at — a generated
+report, a screenshot, a markdown file, a deployed URL — and you want it in
+front of them without taking over the current pane.
+
+```bash
+cmux open ./report.md              # Opens in cmux's markdown viewer panel
+cmux open https://staging.app/...  # Opens in a browser surface
+cmux open ./out.png ./out2.png     # Multiple paths/URLs in one call
+```
+
+Targeting flags (`--workspace`, `--surface`, `--pane`, `--window`,
+`--focus|--no-focus`) let you route the open into an existing surface or
+keep focus where it is. Use `--no-focus` for ambient updates that should
+not interrupt the user.
+
+`cmux open` is the right tool for one-shot artifact display. For scripted
+DOM interaction or visual verification of a dev server, use
+`cmux browser open-split` instead (see above) — it returns a surface ref
+you can drive further.
+
 ### Superpowers plugin
 
 When the Superpowers plugin is active, certain of its workflows pair
