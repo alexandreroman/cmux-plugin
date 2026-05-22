@@ -7,6 +7,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.0] — 2026-05-22
+
+### Added
+- `SKILL.md`: new section documenting `cmux open` — one-shot artifact display for paths and URLs (markdown viewer, browser surface, multiple inputs in one call), with targeting flags (`--workspace`, `--surface`, `--pane`, `--window`, `--focus|--no-focus`) and an explicit contrast with `cmux browser open-split` for scripted DOM work.
+
+### Fixed
+- `references/browser-automation.md`: removed `viewport`, `geolocation`, `offline`, `network` from the "other useful subcommands" list — these are not part of the current `cmux browser` CLI (verified against cmux 0.64.9). Replaced with `frame`, `highlight`, `state save|load`.
+
+---
+
 ## [1.3.0] — 2026-05-14
 
 ### Changed (breaking)
