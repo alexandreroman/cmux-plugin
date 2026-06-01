@@ -13,7 +13,7 @@
 # Silently exits if not running inside cmux.
 
 # ── Guard ──────────────────────────────────────────────────────────────────────
-[ -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" ] || exit 0
+[ -S "${CMUX_SOCKET_PATH:-$HOME/Library/Application Support/cmux/cmux.sock}" ] || exit 0
 command -v cmux &>/dev/null                  || exit 0
 command -v jq   &>/dev/null                  || exit 0
 

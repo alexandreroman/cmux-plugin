@@ -61,7 +61,7 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
     git -C <main-worktree> branch -d feature/<slug>
     ```
 
-12. **Notify the *main* workspace's sidebar** (find it via `cmux list-workspaces` if you can match by name; otherwise skip — the closing workspace's log will be discarded with it):
+12. **Notify the *main* workspace's sidebar** (find it via `cmux workspace list` if you can match by name; otherwise skip — the closing workspace's log will be discarded with it):
     ```bash
     cmux log --level success --source "claude" --workspace <main-workspace-id> \
       -- "Merged feature/<slug> → <base-branch>; worktree removed"
@@ -70,7 +70,7 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
 
 13. **Close this cmux workspace.** This terminates the running Claude Code; do it last.
     ```bash
-    cmux close-workspace --workspace $CMUX_WORKSPACE_ID
+    cmux workspace close $CMUX_WORKSPACE_ID
     ```
 
 Do not push to `origin` unless the user explicitly asks. Do not delete the remote branch.

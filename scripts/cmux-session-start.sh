@@ -7,7 +7,7 @@
 # Silently exits if not running inside cmux.
 
 # ── Guard ──────────────────────────────────────────────────────────────────────
-[ -S "${CMUX_SOCKET_PATH:-/tmp/cmux.sock}" ] || exit 0
+[ -S "${CMUX_SOCKET_PATH:-$HOME/Library/Application Support/cmux/cmux.sock}" ] || exit 0
 [ -n "$CMUX_WORKSPACE_ID" ]                  || exit 0
 command -v cmux &>/dev/null                  || exit 0
 
@@ -44,11 +44,11 @@ else
 fi
 
 # ── Rename the workspace tab ───────────────────────────────────────────────────
-# Respect names set by the caller via `cmux new-workspace --name <name>`. If the
+# Respect names set by the caller via `cmux workspace create --name <name>`. If the
 # workspace already has a customized name (e.g. `<parent>-<id>` set by a wrapper
 # script), don't clobber it with the default derived from the repo basename.
 #
-# `$CMUX_WORKSPACE_ID` is a UUID, but `cmux list-workspaces` emits short refs
+# `$CMUX_WORKSPACE_ID` is a UUID, but `cmux workspace list` emits short refs
 # (workspace:N) in column 1. We can't awk-filter the listing by the UUID
 # directly — that's a silent miss that makes this hook always rename. Resolve
 # UUID → ref via `cmux identify --workspace <id>` first, then look up the title
@@ -58,14 +58,14 @@ WORKSPACE_REF=$(cmux identify --workspace "$CMUX_WORKSPACE_ID" --json 2>/dev/nul
     | grep -m1 '"workspace_ref"' \
     | sed -E 's/.*"(workspace:[0-9]+)".*/\1/')
 
-CURRENT_NAME=$(cmux list-workspaces 2>/dev/null \
+CURRENT_NAME=$(cmux workspace list 2>/dev/null \
     | sed -E 's/^[* ] +//' \
     | awk -F'  +' -v ref="$WORKSPACE_REF" '$1 == ref { print $2 }')
 
 if [ -n "$CURRENT_NAME" ] && [ "$CURRENT_NAME" != "$WORKSPACE_NAME" ] && [ "$CURRENT_NAME" != "claude" ]; then
     : # custom name already set — leave it alone
 else
-    cmux rename-workspace --workspace "$CMUX_WORKSPACE_ID" "$WORKSPACE_NAME" 2>/dev/null
+    cmux workspace rename "$CMUX_WORKSPACE_ID" --title "$WORKSPACE_NAME" 2>/dev/null
 fi
 
 # ── Sidebar status entry ───────────────────────────────────────────────────────

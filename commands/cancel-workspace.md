@@ -56,7 +56,7 @@ This command is destructive — uncommitted work and unmerged commits will be lo
 
 11. **Close this cmux workspace** (last — this kills the running Claude Code):
     ```bash
-    cmux close-workspace --workspace $CMUX_WORKSPACE_ID
+    cmux workspace close $CMUX_WORKSPACE_ID
     ```
 
 Do not touch `origin` — never push or delete remote branches from this command.

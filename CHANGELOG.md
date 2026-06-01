@@ -7,6 +7,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.1] — 2026-06-01
+
+### Added
+- `references/spawning-workspaces.md`: new "Grouping related spawns" section covering the `cmux workspace-group` namespace — anchor-owned collapsible sidebar groups, `create --from`, `add`, and `ungroup` vs the destructive `delete` (which closes every member).
+- `SKILL.md`: document `cmux diff` for rendering a unified diff in a browser split (`--branch`, `--unstaged`, or piped stdin) as an artifact-display alternative to dumping a patch in the terminal.
+- `CLAUDE.md`: present-tense documentation rule — skill and command docs describe the CLI as it currently is, with no "now"/"used to"/"previously" wording and no cmux version numbers in behavior descriptions.
+
+### Changed
+- Adopted the canonical `cmux workspace <list|create|close|rename>` noun namespace throughout the plugin — the skill, the slash commands (`commands/`), and the SessionStart hook (`scripts/cmux-session-start.sh`) — in place of the legacy `list-workspaces`/`new-workspace`/`close-workspace`/`rename-workspace` verbs (which still work but print a deprecation hint).
+- `references/spawning-workspaces.md`: resolve the caller's workspace name via `cmux workspace list --json` + `jq` on `.title` instead of the brittle `sed`/`awk` column parse.
+- `SKILL.md`: clarified `cmux open` routing — markdown opens in a markdown preview tab, other files in file preview tabs, URLs in a browser surface.
+
+### Fixed
+- `references/browser-automation.md`: restored the browser emulation and network subcommands (`viewport`, `geolocation`, `offline`, `network`, `trace`, `screencast`) to the "other useful subcommands" list (verified against cmux 0.64.11), and noted that `cmux browser open-split` defaults to `--focus false`.
+- `scripts/cmux-session-start.sh` and `scripts/cmux-notify.sh`: corrected the default socket path in the in-cmux guard from `/tmp/cmux.sock` to `~/Library/Application Support/cmux/cmux.sock`, so the hooks no longer silently exit when `CMUX_SOCKET_PATH` is unset (matches the detection snippet already fixed in the skill).
+
+---
+
 ## [1.4.0] — 2026-05-22
 
 ### Added

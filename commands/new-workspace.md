@@ -93,7 +93,7 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     `"You are starting feature/<slug> in an isolated worktree. Ask the user what they want to work on."`
 
     Persist the brief to a temp file — embedding it inline through
-    `cmux new-workspace --command` is a quoting nightmare with multi-line
+    `cmux workspace create --command` is a quoting nightmare with multi-line
     prompts and any user-supplied quotes:
     ```bash
     PROMPT_FILE=$(mktemp -t cmux-workspace-prompt.XXXXXX)
@@ -120,7 +120,7 @@ Follow these steps strictly. If any check fails, stop and report the reason.
       STARTUP="claude \"\$(cat $PROMPT_FILE && rm -f $PROMPT_FILE)\""
     fi
 
-    cmux new-workspace \
+    cmux workspace create \
       --name "<repo-basename>-<slug>" \
       --cwd "<repo-root>/.worktrees/<slug>" \
       --command "$STARTUP" \
