@@ -14,6 +14,9 @@ BROWSER_OUT=$(cmux browser open-split "http://localhost:3000")
 BROWSER_SURFACE=$(echo "$BROWSER_OUT" | sed -E 's/.*surface=(surface:[0-9]+).*/\1/')
 ```
 
+`open-split` defaults to `--focus false`, so it won't steal focus from the
+terminal — pass `--focus true` when you want the browser pane brought forward.
+
 `cmux browser open-split` does NOT accept a `--direction` flag — the daemon
 silently ignores it. When direction matters, create the pane explicitly:
 
@@ -42,6 +45,12 @@ Other useful subcommands: `goto|navigate`, `back|forward|reload`, `dblclick`,
 `hover`, `press`, `select`, `scroll`, `is visible|enabled|checked`,
 `find role|text|…`, `dialog accept|dismiss`, `download`, `cookies`, `storage`,
 `tab`, `frame`, `highlight`, `state save|load`.
+
+For shaping the test environment, emulation and network controls are available:
+`viewport <w> <h>`, `geolocation <lat> <lon>`, `offline <true|false>`,
+`network route|unroute|requests` (intercept, block, or list requests),
+`trace start|stop`, and `screencast start|stop`. Run `cmux browser --help` for
+the full surface.
 
 ## Cleanup
 

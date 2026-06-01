@@ -25,7 +25,7 @@ Orient yourself:
 
 ```bash
 cmux identify --json     # Current window / workspace / pane / surface IDs
-cmux list-workspaces     # All open workspaces
+cmux workspace list      # All open workspaces
 ```
 
 ## Hierarchy
@@ -52,8 +52,9 @@ context. One workspace per isolated thread — not per subtask.
 **Always name it `<caller-workspace-name>-<task-slug>`.** The parent context
 must be visible in the sidebar; never use a bare task slug.
 
-For naming resolution, `--cwd` semantics, and the self-closing pattern for
-short-lived spawned workspaces, read
+For naming resolution, `--cwd` semantics, grouping a fan-out of spawns under
+one sidebar header, and the self-closing pattern for short-lived spawned
+workspaces, read
 [references/spawning-workspaces.md](references/spawning-workspaces.md).
 
 ### Browser split — visual and DOM verification
@@ -129,9 +130,9 @@ report, a screenshot, a markdown file, a deployed URL — and you want it in
 front of them without taking over the current pane.
 
 ```bash
-cmux open ./report.md              # Opens in cmux's markdown viewer panel
-cmux open https://staging.app/...  # Opens in a browser surface
-cmux open ./out.png ./out2.png     # Multiple paths/URLs in one call
+cmux open ./report.md              # Markdown → live-reloading markdown preview tab
+cmux open ./out.png ./diagram.pdf  # Other files → file preview tabs (one per path)
+cmux open https://staging.app/...  # URL → browser surface
 ```
 
 Targeting flags (`--workspace`, `--surface`, `--pane`, `--window`,
@@ -143,6 +144,18 @@ not interrupt the user.
 DOM interaction or visual verification of a dev server, use
 `cmux browser open-split` instead (see above) — it returns a surface ref
 you can drive further.
+
+To show the user a **rendered diff** rather than dumping a patch into the
+terminal, use `cmux diff` — it renders a unified diff in a browser split:
+
+```bash
+cmux diff --branch              # Current branch vs its merge base
+cmux diff --unstaged            # Working-tree changes
+git diff | cmux diff            # Or pipe any patch in via stdin
+```
+
+Like the browser split, it defaults to `--no-focus`; pass `--focus true` to
+bring it forward.
 
 ### Superpowers plugin
 
