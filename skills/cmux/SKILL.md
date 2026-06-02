@@ -151,8 +151,15 @@ terminal, use `cmux diff` — it renders a unified diff in a browser split:
 ```bash
 cmux diff --branch              # Current branch vs its merge base
 cmux diff --unstaged            # Working-tree changes
+cmux diff --staged              # Staged changes
+cmux diff --last-turn           # Changes since this surface's last agent-turn baseline
 git diff | cmux diff            # Or pipe any patch in via stdin
 ```
+
+`--last-turn` is the agent-friendly source: it shows exactly what changed
+since your last turn's baseline, so you can surface your own edits without
+diffing branches by hand. Tune presentation with `--layout split|unified`
+and `--font-size <points>`.
 
 Like the browser split, it defaults to `--no-focus`; pass `--focus true` to
 bring it forward.
