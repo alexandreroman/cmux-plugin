@@ -7,6 +7,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.2] — 2026-06-02
+
+### Added
+- `SKILL.md`: expand the `cmux diff` example with the agent-friendly `--last-turn` source (changes since this surface's last agent-turn baseline) and `--staged`, plus the `--layout split|unified` and `--font-size` presentation options.
+
+---
+
 ## [1.4.1] — 2026-06-01
 
 ### Added
