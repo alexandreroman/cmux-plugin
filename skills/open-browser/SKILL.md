@@ -1,5 +1,7 @@
 ---
+name: open-browser
 description: Open a browser split pane alongside the current terminal and navigate to the dev server or a specified URL. Use for visual verification of UI, debugging layout issues, or testing a running app. Arguments: optional URL (defaults to http://localhost:3000).
+argument-hint: "[url]"
 ---
 
 Open a cmux browser split for visual verification.

@@ -7,6 +7,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- Workspace grouping for isolated workspaces. `new-workspace` attaches each isolated workspace to a single sidebar group anchored on the **origin** workspace it was spawned from (the group header *is* the origin's sidebar row); repeated spawns from the same origin fold into that same group, so the sidebar shows one collapsible header per origin instead of a flat list. `close-workspace` and `cancel-workspace` dissolve the group (`cmux workspace-group ungroup`, which preserves the origin — never `delete`, which would close every member) once the closing workspace is the group's last slice; otherwise they just drop themselves from it. Grouping is best-effort — if any `cmux workspace-group` call fails, the worktree and workspace are still created and usable.
+- `references/workspace-lifecycle.md`: document the one-group-per-origin model and when the group is dissolved.
+
+### Changed
+- Migrated the plugin's slash commands to skills, the format Claude Code commands have been merged into. Each `commands/<name>.md` moved to `skills/<name>/SKILL.md` with a `name:` (and, where relevant, `argument-hint:`) frontmatter field; `commands/` is removed. Invocation is unchanged — `/cmux:status`, `/cmux:open-browser`, `/cmux:new-workspace`, `/cmux:close-workspace`, and `/cmux:cancel-workspace` still work as slash commands, and Claude can now also auto-invoke each from its description. `$ARGUMENTS` substitution carries over unchanged.
+- Reframed the documentation (`README.md`, `CLAUDE.md`, the `cmux` skill, and its references) to describe these as skills rather than slash commands.
+
+---
+
 ## [1.4.2] — 2026-06-02
 
 ### Added

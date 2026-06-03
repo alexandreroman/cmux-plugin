@@ -1,4 +1,5 @@
 ---
+name: status
 description: Show current cmux workspace context — workspaces, panes, surfaces, and sidebar state. Useful for orientation when managing multiple parallel tasks.
 ---
 

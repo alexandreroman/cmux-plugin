@@ -2,11 +2,11 @@
 
 Guidance for working in this repository (the cmux Claude Code plugin).
 
-## Writing skill and command docs
+## Writing skill docs
 
-When writing or updating the skill (`skills/cmux/`), slash commands
-(`commands/`), or any plugin documentation, describe the CLI in the **present
-tense, as it currently is**:
+When writing or updating any skill under `skills/` (the core `cmux` skill, the
+workspace-lifecycle skills, or any plugin documentation), describe the CLI in
+the **present tense, as it currently is**:
 
 - Do **not** use "now", "used to", "no longer", "previously", "restored", or
   similar comparative wording.

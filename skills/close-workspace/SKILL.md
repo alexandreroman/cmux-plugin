@@ -1,4 +1,5 @@
 ---
+name: close-workspace
 description: PROACTIVE — land the work in an isolated cmux workspace: merge its branch into the base branch (fast-forward when possible), remove the worktree and local branch, and close the cmux workspace. Triggers on "merge it", "ship it", "this is done", "wrap this up", "let's land this", "review approved", or when tests/checks pass and the user wants to integrate. Run from inside an isolated worktree created by `/cmux:new-workspace`; suggest or run this instead of doing the merge by hand.
 ---
 
@@ -10,7 +11,7 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
 
 2. **Confirm we are inside a linked worktree** (not the main repo):
    - `git rev-parse --git-common-dir` and `git rev-parse --git-dir` must differ.
-   - If we are in the main worktree, refuse and tell the user this command must be run from an isolated worktree.
+   - If we are in the main worktree, refuse and tell the user this skill must be run from an isolated worktree.
 
 3. **Identify the workspace branch and main worktree.**
    - Branch: `git rev-parse --abbrev-ref HEAD`. Reject if it is `HEAD` (detached) or empty.
@@ -47,7 +48,7 @@ Follow these steps strictly. If any check fails, stop and report the reason — 
    The hook is the project's chance to tear down side-effect state created by
    `post-create.sh` (stop a dev server, drop a temp database, prune containers,
    etc.). If the hook exits non-zero, stop and report the failure — do not
-   remove the worktree. The merge has already landed, so re-running the command
+   remove the worktree. The merge has already landed, so re-running the skill
    after the user fixes the hook will be a no-op for the merge step and will
    continue to the cleanup. Skip silently if the hook is absent.
 

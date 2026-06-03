@@ -1,5 +1,7 @@
 ---
+name: new-workspace
 description: PROACTIVE — spawn an isolated cmux workspace (git worktree + workspace tab + Claude Code instance) for a discrete piece of work that should not share state with the main worktree: a feature, a code review, a spike, a long refactor. Triggers on phrases like "new feature", "let's add X", "build a Y", "implement Z", "review this PR", "spike <something>", "let's work on Z". Run from the main worktree; skip for trivial fixes, doc tweaks, or when already inside an isolated worktree. Argument: a short slug describing the work (required, e.g. `auth-jwt`, `review-pr-42`).
+argument-hint: <slug>
 ---
 
 Start a new isolated cmux workspace for parallel work — a feature, a code
@@ -10,11 +12,11 @@ The user provided this slug (raw, may need sanitizing): `$ARGUMENTS`
 
 Follow these steps strictly. If any check fails, stop and report the reason.
 
-1. **Verify cmux is available.** Run the detection block from the cmux skill (`CMUX_WORKSPACE_ID`, socket, `cmux` binary). If not inside cmux, explain that this command requires cmux and stop.
+1. **Verify cmux is available.** Run the detection block from the cmux skill (`CMUX_WORKSPACE_ID`, socket, `cmux` binary). If not inside cmux, explain that this skill requires cmux and stop.
 
 2. **Validate the argument.** If `$ARGUMENTS` is empty or only whitespace, ask the user for a workspace slug and stop.
 
-3. **Sanitize into a slug.** Lowercase; replace spaces and underscores with `-`; collapse consecutive dashes; strip anything that is not `[a-z0-9-]`. Reject if the slug is empty after sanitizing. Use this slug for the rest of the command.
+3. **Sanitize into a slug.** Lowercase; replace spaces and underscores with `-`; collapse consecutive dashes; strip anything that is not `[a-z0-9-]`. Reject if the slug is empty after sanitizing. Use this slug for the rest of the skill.
 
 4. **Confirm we are in the main worktree of a git repo.**
    - `git rev-parse --show-toplevel` → `<repo-root>` (must succeed).
@@ -81,14 +83,14 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     will boot in the isolated worktree with no memory of this conversation —
     without a prompt it just sits idle. Write a self-contained instruction it
     can act on immediately, drawn from the chat context that triggered this
-    command:
+    skill:
     - State the goal and scope explicitly. Quote concrete constraints the user
       mentioned (files to touch, modules involved, acceptance criteria).
     - Tell the new Claude it is already in the isolated worktree and should
       commit progress as it goes, then report when done.
     - Keep it under ~500 words. Action-oriented, not a recap of the chat.
 
-    If the chat context is thin (the slash command was invoked alone, with no
+    If the chat context is thin (the skill was invoked alone, with no
     surrounding intent), fall back to a placeholder that defers to the user:
     `"You are starting feature/<slug> in an isolated worktree. Ask the user what they want to work on."`
 
@@ -130,7 +132,7 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     ```
 
 14. **Attach the new workspace to the origin's sidebar group.** Group the
-    isolated workspace together with this origin workspace (the one this command
+    isolated workspace together with this origin workspace (the one this skill
     runs in) so the sidebar shows a single collapsible header per origin. There
     is exactly **one group per origin**: the origin is its anchor — the group
     header *is* the origin's sidebar row — and every workspace spawned from this

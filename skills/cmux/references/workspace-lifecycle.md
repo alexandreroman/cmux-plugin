@@ -1,6 +1,6 @@
-# Workspace lifecycle slash commands
+# Workspace lifecycle skills
 
-The three commands below (`/cmux:new-workspace`, `/cmux:close-workspace`,
+The three skills below (`/cmux:new-workspace`, `/cmux:close-workspace`,
 `/cmux:cancel-workspace`) all operate on the same layout: a `feature/<slug>`
 branch checked out under `.worktrees/<slug>` with a matching cmux workspace
 named `<repo-basename>-<slug>`. The `feature/<slug>` prefix is a short-lived
@@ -14,7 +14,7 @@ workspace spawned from it joins that same group. When a slice is closed or
 cancelled and only the origin is left, the group is dissolved so a lone
 workspace never sits inside a one-member group. If the user is on a branch
 they made by hand and there's no matching cmux workspace, suggest the
-matching slash command but verify the preconditions in the command file
+matching skill but verify the preconditions in the skill file
 before invoking — don't retrofit the cleanup logic onto an unrelated branch.
 
 ## `/cmux:new-workspace <slug>`

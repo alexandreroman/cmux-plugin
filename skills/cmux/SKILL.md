@@ -102,10 +102,10 @@ cmux notify --title "Claude Code" --body "Sub-agent finished: auth feature ready
 cmux trigger-flash    # Flash the pane ring for visual attention
 ```
 
-### Isolated workspace lifecycle slash commands
+### Isolated workspace lifecycle skills
 
 When the user starts, lands, or discards a piece of isolated work (a feature,
-a code review, a spike, a refactor), prefer the slash commands over running
+a code review, a spike, a refactor), prefer these skills over running
 `git worktree` / `git branch` / `git merge` by hand:
 
 - `/cmux:new-workspace <slug>` — open an isolated worktree+workspace, grouped under the origin
@@ -193,7 +193,7 @@ cmux capabilities            # JSON list of every RPC method the daemon exposes
 - **Never crash** if cmux is absent. All cmux calls are best-effort, exit 0.
 - **Spawn a workspace** for parallel/isolated work only — not for subtasks.
   Name as `<caller-workspace-name>-<task-slug>`, never a bare slug.
-- **Prefer feature lifecycle slash commands** over manual git plumbing.
+- **Prefer the workspace lifecycle skills** over manual git plumbing.
 - **Browser split** for visual/DOM verification only. Close with
   `cmux close-surface` when done.
 - **Progress bar** for tasks over ~30 seconds.

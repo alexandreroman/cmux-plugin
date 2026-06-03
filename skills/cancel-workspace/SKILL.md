@@ -1,10 +1,11 @@
 ---
+name: cancel-workspace
 description: PROACTIVE — destructively discard an isolated cmux workspace: force-remove the worktree, force-delete the branch, and close the cmux workspace. Any uncommitted or unmerged work is lost. Triggers on "abandon", "discard this", "scrap it", "let's start over", "this isn't working", "forget this branch", "nuke this workspace". Run from inside an isolated worktree; suggest or run this instead of manually deleting branches/worktrees. Always asks for explicit confirmation via AskUserQuestion, even in auto mode.
 ---
 
 Cancel the current isolated workspace: discard all changes and clean up.
 
-This command is destructive — uncommitted work and unmerged commits will be lost. You MUST get explicit user confirmation before running steps 7+.
+This skill is destructive — uncommitted work and unmerged commits will be lost. You MUST get explicit user confirmation before running steps 7+.
 
 1. **Verify cmux is available** (same detection as in the cmux skill). If not inside cmux, stop.
 
@@ -85,4 +86,4 @@ This command is destructive — uncommitted work and unmerged commits will be lo
     cmux workspace close $CMUX_WORKSPACE_ID
     ```
 
-Do not touch `origin` — never push or delete remote branches from this command.
+Do not touch `origin` — never push or delete remote branches from this skill.

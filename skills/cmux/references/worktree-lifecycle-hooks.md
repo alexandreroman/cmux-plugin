@@ -9,7 +9,7 @@ These are **project-level** hooks committed to the repo under `.cmux/`. They
 are not the same as the plugin's own `hooks/hooks.json`, and not the same as
 Claude Code hooks in `~/.claude/settings.json`. They run only when the
 `/cmux:new-workspace`, `/cmux:close-workspace`, or `/cmux:cancel-workspace`
-commands operate on an isolated worktree.
+skills operate on an isolated worktree.
 
 ## The two hooks
 

@@ -13,7 +13,7 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 | **Browser split automation** | Claude proactively opens a browser split when it needs to visually verify your dev server or debug UI |
 | **Isolated workspace workflow** | `/cmux:new-workspace`, `/cmux:close-workspace`, `/cmux:cancel-workspace` — git worktree + isolated cmux workspace per piece of work (feature, code review, spike, refactor), with a Claude Code instance per worktree |
 | **Superpowers integration** | When the [Superpowers plugin](https://claude.com/plugins/superpowers) triggers `using-git-worktrees`, Claude opens a new cmux workspace for the branch automatically |
-| **Slash commands** | `/cmux:status`, `/cmux:open-browser`, `/cmux:new-workspace`, `/cmux:close-workspace`, `/cmux:cancel-workspace` |
+| **Skills** | `/cmux:status`, `/cmux:open-browser`, `/cmux:new-workspace`, `/cmux:close-workspace`, `/cmux:cancel-workspace` — each invocable as a slash command or auto-invoked by Claude when the context matches |
 
 ## Requirements
 
@@ -31,9 +31,13 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 /reload-plugins
 ```
 
-## Slash Commands
+## Skills
 
-| Command | Description |
+Each ships as a skill under `skills/`. Invoke it manually as a slash command
+(`/cmux:<name>`), or let Claude invoke it automatically when the conversation
+matches the skill's description.
+
+| Skill | Description |
 |---|---|
 | `/cmux:status` | Show current workspace, panes, surfaces, and sidebar log |
 | `/cmux:open-browser [url]` | Open a browser split (defaults to `localhost:3000`) |
@@ -164,20 +168,19 @@ cmux-plugin/
 ├── .claude-plugin/
 │   └── plugin.json            # Plugin manifest
 ├── skills/
-│   └── cmux/
-│       ├── SKILL.md           # Core skill — teaches Claude when/how to use cmux
-│       └── references/        # On-demand details (browser, workspace lifecycle, ...)
+│   ├── cmux/
+│   │   ├── SKILL.md           # Core skill — teaches Claude when/how to use cmux
+│   │   └── references/        # On-demand details (browser, workspace lifecycle, ...)
+│   ├── status/SKILL.md           # /cmux:status
+│   ├── open-browser/SKILL.md     # /cmux:open-browser
+│   ├── new-workspace/SKILL.md    # /cmux:new-workspace
+│   ├── close-workspace/SKILL.md  # /cmux:close-workspace
+│   └── cancel-workspace/SKILL.md # /cmux:cancel-workspace
 ├── hooks/
 │   └── hooks.json             # Hook event declarations
 ├── scripts/
 │   ├── cmux-session-start.sh  # Renames workspace tab on session start
 │   └── cmux-notify.sh         # Forwards sub-agent completions and Notification events to cmux
-├── commands/
-│   ├── status.md              # /cmux:status
-│   ├── open-browser.md        # /cmux:open-browser
-│   ├── new-workspace.md       # /cmux:new-workspace
-│   ├── close-workspace.md     # /cmux:close-workspace
-│   └── cancel-workspace.md    # /cmux:cancel-workspace
 ├── CHANGELOG.md
 └── README.md
 ```
