@@ -7,7 +7,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [1.5.0] — 2026-06-03
 
 ### Added
 - Workspace grouping for isolated workspaces. `new-workspace` attaches each isolated workspace to a single sidebar group anchored on the **origin** workspace it was spawned from (the group header *is* the origin's sidebar row); repeated spawns from the same origin fold into that same group, so the sidebar shows one collapsible header per origin instead of a flat list. `close-workspace` and `cancel-workspace` dissolve the group (`cmux workspace-group ungroup`, which preserves the origin — never `delete`, which would close every member) once the closing workspace is the group's last slice; otherwise they just drop themselves from it. Grouping is best-effort — if any `cmux workspace-group` call fails, the worktree and workspace are still created and usable.
