@@ -120,24 +120,64 @@ Follow these steps strictly. If any check fails, stop and report the reason.
       STARTUP="claude \"\$(cat $PROMPT_FILE && rm -f $PROMPT_FILE)\""
     fi
 
-    cmux workspace create \
+    # Capture the new workspace's ref (e.g. workspace:17) — step 14 needs it.
+    NEW_WS=$(cmux workspace create \
       --name "<repo-basename>-<slug>" \
       --cwd "<repo-root>/.worktrees/<slug>" \
       --command "$STARTUP" \
-      --focus true
+      --focus true \
+      --json | jq -r '.workspace_ref')
     ```
 
-14. **Log a sidebar entry in the *current* workspace** (the main one — we are
+14. **Attach the new workspace to the origin's sidebar group.** Group the
+    isolated workspace together with this origin workspace (the one this command
+    runs in) so the sidebar shows a single collapsible header per origin. There
+    is exactly **one group per origin**: the origin is its anchor — the group
+    header *is* the origin's sidebar row — and every workspace spawned from this
+    origin joins that same group.
+
+    - Resolve the origin's ref: `ORIGIN=$(cmux identify --json | jq -r '.caller.workspace_ref')`.
+    - Look for a group that already contains the origin (created by an earlier
+      `/cmux:new-workspace` from here):
+      ```bash
+      GROUP=$(cmux workspace-group list --json \
+        | jq -r --arg o "$ORIGIN" \
+            '.groups[] | select(.member_workspace_refs | index($o)) | .ref' \
+        | head -n1)
+      ```
+    - **If a group exists**, fold the new workspace in:
+      ```bash
+      cmux workspace-group add --group "$GROUP" --workspace "$NEW_WS"
+      ```
+    - **If no group exists**, create one anchored on the origin. `cmux
+      workspace-group create` spawns a fresh placeholder workspace as the group
+      header, so promote the origin to anchor and discard that placeholder:
+      ```bash
+      GROUP=$(cmux workspace-group create --name "<repo-basename>" --from "$ORIGIN" | awk '{print $2}')
+      PLACEHOLDER=$(cmux workspace-group list --json \
+        | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .anchor_workspace_ref')
+      cmux workspace-group set-anchor --group "$GROUP" --workspace "$ORIGIN"
+      if [ -n "$PLACEHOLDER" ] && [ "$PLACEHOLDER" != "$ORIGIN" ]; then
+        cmux workspace-group remove --workspace "$PLACEHOLDER"
+        cmux workspace close "$PLACEHOLDER"
+      fi
+      cmux workspace-group add --group "$GROUP" --workspace "$NEW_WS"
+      ```
+
+    Treat grouping as best-effort: if any of these calls fail, log it and carry
+    on — the worktree and workspace are already created and usable.
+
+15. **Log a sidebar entry in the *current* workspace** (the main one — we are
     still here):
     ```bash
     cmux log --level success --source "claude" -- "Opened workspace <slug> → .worktrees/<slug>"
     ```
 
-15. **Report to the user.** One short paragraph including:
+16. **Report to the user.** One short paragraph including:
     - Branch and worktree path
     - Which env files were symlinked (or "none")
     - Whether the `post-create` hook was found and chained, or skipped
-    - That the new cmux workspace is focused and Claude Code is now executing
-      the brief you synthesized (or, in the placeholder case, that it is
-      waiting on the user inside the new workspace)
+    - That the new cmux workspace is focused, grouped under the origin, and
+      Claude Code is now executing the brief you synthesized (or, in the
+      placeholder case, that it is waiting on the user inside the new workspace)
     - Suggestion: `/cmux:close-workspace` or `/cmux:cancel-workspace` when done

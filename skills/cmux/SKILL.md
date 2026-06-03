@@ -108,9 +108,9 @@ When the user starts, lands, or discards a piece of isolated work (a feature,
 a code review, a spike, a refactor), prefer the slash commands over running
 `git worktree` / `git branch` / `git merge` by hand:
 
-- `/cmux:new-workspace <slug>` — open an isolated worktree+workspace
-- `/cmux:close-workspace` — merge, remove worktree, close workspace
-- `/cmux:cancel-workspace` — destructive; confirm first
+- `/cmux:new-workspace <slug>` — open an isolated worktree+workspace, grouped under the origin
+- `/cmux:close-workspace` — merge, remove worktree, close workspace; dissolve the group when it's the last slice
+- `/cmux:cancel-workspace` — destructive; confirm first; same group cleanup as close
 
 For trigger phrasing, preconditions, and when to fall through to manual git
 plumbing, read [references/workspace-lifecycle.md](references/workspace-lifecycle.md).

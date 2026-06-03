@@ -54,7 +54,33 @@ This command is destructive — uncommitted work and unmerged commits will be lo
     git -C <main-worktree> branch -D feature/<slug>
     ```
 
-11. **Close this cmux workspace** (last — this kills the running Claude Code):
+11. **Dissolve the origin's group if this is its last slice.** This workspace
+    belongs to the origin's sidebar group (created by `/cmux:new-workspace`).
+    Once it leaves, the group may hold only the origin — a one-member group is
+    pointless, so dissolve it. Do this *before* closing our own workspace (next
+    step): once the workspace closes, this Claude is gone and cannot run the
+    cleanup. Treat the whole step as best-effort.
+    ```bash
+    SELF=$(cmux identify --json | jq -r '.caller.workspace_ref')
+    GROUP=$(cmux workspace-group list --json \
+      | jq -r --arg s "$SELF" \
+          '.groups[] | select(.member_workspace_refs | index($s)) | .ref' \
+      | head -n1)
+    if [ -n "$GROUP" ]; then
+      COUNT=$(cmux workspace-group list --json \
+        | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .member_count')
+      if [ "$COUNT" -le 2 ]; then
+        # us plus at most the origin → dissolving leaves the origin ungrouped.
+        # Never use `delete`: that would close the origin too.
+        cmux workspace-group ungroup "$GROUP"
+      else
+        # other slices remain — just drop ourselves from the group.
+        cmux workspace-group remove --workspace "$SELF"
+      fi
+    fi
+    ```
+
+12. **Close this cmux workspace** (last — this kills the running Claude Code):
     ```bash
     cmux workspace close $CMUX_WORKSPACE_ID
     ```
