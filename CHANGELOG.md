@@ -7,6 +7,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.5.1] — 2026-06-04
+
+### Fixed
+- Workspace grouping now follows cmux's documented group model, so each group shows a proper collapsible `📁 <repo-basename>` header again. `new-workspace` keeps the dedicated placeholder workspace that `cmux workspace-group create` spawns as the group's anchor — the anchor *is* the header — and folds the **origin** and each spawned slice in as members beneath it, reordering the origin first so the parent leads its slices. Previously it reassigned the anchor to the origin via `cmux workspace-group set-anchor` and closed the placeholder; because cmux draws the header from the original anchor and never promotes an existing workspace to anchor, that stripped the header and left the members rendered as a flat, header-less list.
+- `close-workspace` and `cancel-workspace` dissolve the group by closing its placeholder anchor (cmux dissolves the group and preserves the origin as an ungrouped workspace), guarded so a group whose anchor is the origin itself is only `ungroup`ped — the origin is never closed. The "last slice" threshold accounts for the placeholder header now counting as a member.
+
+### Added
+- `references/workspace-lifecycle.md`: link to cmux's upstream `docs/workspace-groups.md`, documenting that a group's anchor is always a freshly-spawned dedicated workspace and is never promoted from an existing one.
+
+---
+
 ## [1.5.0] — 2026-06-03
 
 ### Added
