@@ -131,39 +131,39 @@ Follow these steps strictly. If any check fails, stop and report the reason.
       --json | jq -r '.workspace_ref')
     ```
 
-14. **Attach the new workspace to the origin's sidebar group.** Group the
-    isolated workspace together with this origin workspace (the one this skill
-    runs in) so the sidebar shows a single collapsible header per origin. There
-    is exactly **one group per origin**: the origin is its anchor — the group
-    header *is* the origin's sidebar row — and every workspace spawned from this
-    origin joins that same group.
+14. **Group the new workspace under a per-origin sidebar folder.** The sidebar
+    shows one collapsible `📁 <repo-basename>` folder per origin (the workspace
+    this skill runs in); under it sit the origin and every isolated workspace
+    spawned from it. There is exactly **one group per origin**.
+
+    A group's **anchor** is the placeholder workspace cmux spawns when the group
+    is created — that anchor *is* the `📁` header row, and it carries the group's
+    name. Keep it. Do **not** reassign the anchor to a real workspace or close
+    the placeholder: cmux draws the header from the original anchor, so removing
+    it strips the header and the members collapse into a flat, header-less list.
 
     - Resolve the origin's ref: `ORIGIN=$(cmux identify --json | jq -r '.caller.workspace_ref')`.
-    - Look for a group that already contains the origin (created by an earlier
-      `/cmux:new-workspace` from here):
+    - Reuse a group that already contains the origin (created by an earlier
+      `/cmux:new-workspace` from here); otherwise create one. `cmux
+      workspace-group create --from "$ORIGIN"` spawns the placeholder anchor
+      (the `📁 <repo-basename>` header) and folds the origin in as a member:
       ```bash
       GROUP=$(cmux workspace-group list --json \
         | jq -r --arg o "$ORIGIN" \
             '.groups[] | select(.member_workspace_refs | index($o)) | .ref' \
         | head -n1)
-      ```
-    - **If a group exists**, fold the new workspace in:
-      ```bash
-      cmux workspace-group add --group "$GROUP" --workspace "$NEW_WS"
-      ```
-    - **If no group exists**, create one anchored on the origin. `cmux
-      workspace-group create` spawns a fresh placeholder workspace as the group
-      header, so promote the origin to anchor and discard that placeholder:
-      ```bash
-      GROUP=$(cmux workspace-group create --name "<repo-basename>" --from "$ORIGIN" | awk '{print $2}')
-      PLACEHOLDER=$(cmux workspace-group list --json \
-        | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .anchor_workspace_ref')
-      cmux workspace-group set-anchor --group "$GROUP" --workspace "$ORIGIN"
-      if [ -n "$PLACEHOLDER" ] && [ "$PLACEHOLDER" != "$ORIGIN" ]; then
-        cmux workspace-group remove --workspace "$PLACEHOLDER"
-        cmux workspace close "$PLACEHOLDER"
+      if [ -z "$GROUP" ]; then
+        GROUP=$(cmux workspace-group create --name "<repo-basename>" --from "$ORIGIN" | awk '{print $2}')
       fi
+      ```
+    - Fold the new isolated workspace into the group as a member, then keep the
+      origin first under the header so the parent leads its slices (`add` drops
+      the new member right after the anchor, ahead of the origin):
+      ```bash
       cmux workspace-group add --group "$GROUP" --workspace "$NEW_WS"
+      ANCHOR=$(cmux workspace-group list --json \
+        | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .anchor_workspace_ref')
+      cmux reorder-workspace --workspace "$ORIGIN" --after "$ANCHOR"
       ```
 
     Treat grouping as best-effort: if any of these calls fail, log it and carry
@@ -179,7 +179,8 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     - Branch and worktree path
     - Which env files were symlinked (or "none")
     - Whether the `post-create` hook was found and chained, or skipped
-    - That the new cmux workspace is focused, grouped under the origin, and
-      Claude Code is now executing the brief you synthesized (or, in the
-      placeholder case, that it is waiting on the user inside the new workspace)
+    - That the new cmux workspace is focused, grouped under the
+      `📁 <repo-basename>` sidebar folder, and Claude Code is now executing the
+      brief you synthesized (or, in the placeholder case, that it is waiting on
+      the user inside the new workspace)
     - Suggestion: `/cmux:close-workspace` or `/cmux:cancel-workspace` when done

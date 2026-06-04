@@ -55,12 +55,15 @@ This skill is destructive — uncommitted work and unmerged commits will be lost
     git -C <main-worktree> branch -D feature/<slug>
     ```
 
-11. **Dissolve the origin's group if this is its last slice.** This workspace
-    belongs to the origin's sidebar group (created by `/cmux:new-workspace`).
-    Once it leaves, the group may hold only the origin — a one-member group is
-    pointless, so dissolve it. Do this *before* closing our own workspace (next
-    step): once the workspace closes, this Claude is gone and cannot run the
-    cleanup. Treat the whole step as best-effort.
+11. **Dissolve the origin's group if this is its last slice.** This workspace is
+    a member of the origin's sidebar group (created by `/cmux:new-workspace`).
+    The group's anchor is the placeholder workspace that renders the `📁` header;
+    the origin and the isolated slices are members. Once this slice leaves, the
+    group may hold only the placeholder header and the origin — pointless, so
+    dissolve it. Closing the anchor dissolves the group, preserves the origin as
+    an ungrouped workspace, and clears the placeholder. Do this *before* closing
+    our own workspace (next step): once the workspace closes, this Claude is gone
+    and cannot run the cleanup. Treat the whole step as best-effort.
     ```bash
     SELF=$(cmux identify --json | jq -r '.caller.workspace_ref')
     GROUP=$(cmux workspace-group list --json \
@@ -70,10 +73,28 @@ This skill is destructive — uncommitted work and unmerged commits will be lost
     if [ -n "$GROUP" ]; then
       COUNT=$(cmux workspace-group list --json \
         | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .member_count')
-      if [ "$COUNT" -le 2 ]; then
-        # us plus at most the origin → dissolving leaves the origin ungrouped.
-        # Never use `delete`: that would close the origin too.
-        cmux workspace-group ungroup "$GROUP"
+      if [ "$COUNT" -le 3 ]; then
+        # placeholder header + origin + us → after we leave nothing but the
+        # header and origin remain. Dissolve by closing the anchor (the
+        # placeholder that renders the 📁 header); cmux then preserves every
+        # other member, including the origin, as an ungrouped workspace.
+        ANCHOR=$(cmux workspace-group list --json \
+          | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .anchor_workspace_ref')
+        # The placeholder cmux spawns inherits the origin's directory, so the
+        # origin and the anchor share the main-worktree path. Only close the
+        # anchor when a *distinct* member also sits at the main worktree — that
+        # member is the origin, which proves the anchor is the throwaway
+        # placeholder and not a real workspace. Otherwise (e.g. a group whose
+        # anchor IS the origin) just ungroup, so the origin is never closed.
+        ORIGIN=$(cmux workspace list --json \
+          | jq -r --arg d "<main-worktree>" --arg a "$ANCHOR" \
+              '.workspaces[]? | select(.current_directory==$d and .ref!=$a) | .ref' \
+          | head -n1)
+        if [ -n "$ANCHOR" ] && [ "$ANCHOR" != "$SELF" ] && [ -n "$ORIGIN" ]; then
+          cmux workspace close "$ANCHOR"
+        else
+          cmux workspace-group ungroup "$GROUP"
+        fi
       else
         # other slices remain — just drop ourselves from the group.
         cmux workspace-group remove --workspace "$SELF"
