@@ -11,10 +11,14 @@ Every isolated workspace is grouped under a collapsible `📁 <repo-basename>`
 sidebar folder tied to the workspace it was spawned from (its **origin**).
 There is one folder per origin. The folder's header is a dedicated placeholder
 workspace cmux spawns as the group's anchor; the origin and each spawned slice
-are members under it. When a slice is closed or cancelled and only the
-placeholder header and the origin are left, the folder is dissolved (its anchor
-is closed, the origin preserved) so a lone workspace never sits inside an empty
-folder. If the user is on a branch
+are members under it. This follows cmux's group model, where the anchor is a
+dedicated, freshly-spawned workspace that *is* the header — an existing
+workspace is never promoted to anchor (see
+[cmux's workspace-groups doc](https://github.com/manaflow-ai/cmux/blob/main/docs/workspace-groups.md)).
+When a slice is closed or cancelled and only the placeholder header and the
+origin are left, the folder is dissolved (its anchor is closed, the origin
+preserved) so a lone workspace never sits inside an empty folder. If the user
+is on a branch
 they made by hand and there's no matching cmux workspace, suggest the
 matching skill but verify the preconditions in the skill file
 before invoking — don't retrofit the cleanup logic onto an unrelated branch.
