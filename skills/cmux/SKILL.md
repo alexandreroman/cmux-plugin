@@ -108,8 +108,8 @@ When the user starts, lands, or discards a piece of isolated work (a feature,
 a code review, a spike, a refactor), prefer these skills over running
 `git worktree` / `git branch` / `git merge` by hand:
 
-- `/cmux:new-workspace <slug>` — open an isolated worktree+workspace, grouped under a `📁 <repo>` sidebar folder
-- `/cmux:close-workspace` — merge, remove worktree, close workspace; dissolve the folder when it's the last slice
+- `/cmux:new-workspace <slug>` — open an isolated worktree+workspace (optionally grouped under a `📁 <repo>` sidebar folder, only on explicit request)
+- `/cmux:close-workspace` — merge, remove worktree, close workspace; if it was grouped, dissolve the folder when it's the last slice
 - `/cmux:cancel-workspace` — destructive; confirm first; same group cleanup as close
 
 For trigger phrasing, preconditions, and when to fall through to manual git

@@ -131,10 +131,16 @@ Follow these steps strictly. If any check fails, stop and report the reason.
       --json | jq -r '.workspace_ref')
     ```
 
-14. **Group the new workspace under a per-origin sidebar folder.** The sidebar
-    shows one collapsible `📁 <repo-basename>` folder per origin (the workspace
-    this skill runs in); under it sit the origin and every isolated workspace
-    spawned from it. There is exactly **one group per origin**.
+14. **Optionally group the new workspace (only when the user explicitly asks).**
+    By default, **do not** group — leave the new workspace as a standalone
+    sidebar entry and skip straight to step 15. Run the grouping below *only*
+    when the user explicitly requested it, e.g. "group it under the origin",
+    "put it in a workspace group", "attach this to the `<repo>` group". Spawning
+    a workspace is not by itself a request to group it.
+
+    When grouping is requested, gather the origin and its isolated slices under
+    one collapsible `📁 <repo-basename>` folder per origin (the workspace this
+    skill runs in); there is exactly **one group per origin**.
 
     A group's **anchor** is the placeholder workspace cmux spawns when the group
     is created — that anchor *is* the `📁` header row, and it carries the group's
@@ -179,8 +185,8 @@ Follow these steps strictly. If any check fails, stop and report the reason.
     - Branch and worktree path
     - Which env files were symlinked (or "none")
     - Whether the `post-create` hook was found and chained, or skipped
-    - That the new cmux workspace is focused, grouped under the
-      `📁 <repo-basename>` sidebar folder, and Claude Code is now executing the
-      brief you synthesized (or, in the placeholder case, that it is waiting on
-      the user inside the new workspace)
+    - That the new cmux workspace is focused (and, only if grouping was
+      requested, grouped under the `📁 <repo-basename>` sidebar folder), and
+      Claude Code is now executing the brief you synthesized (or, in the
+      placeholder case, that it is waiting on the user inside the new workspace)
     - Suggestion: `/cmux:close-workspace` or `/cmux:cancel-workspace` when done

@@ -7,16 +7,19 @@ named `<repo-basename>-<slug>`. The `feature/<slug>` prefix is a short-lived
 branch convention — the workspace itself can host any kind of isolated work
 (a feature, a code review, a spike, a refactor).
 
-Every isolated workspace is grouped under a collapsible `📁 <repo-basename>`
-sidebar folder tied to the workspace it was spawned from (its **origin**).
-There is one folder per origin. The folder's header is a dedicated placeholder
+Isolated workspaces **can optionally** be grouped under a collapsible
+`📁 <repo-basename>` sidebar folder tied to the workspace they were spawned from
+(its **origin**), with one folder per origin. Grouping is **opt-in**:
+`new-workspace` leaves the new workspace ungrouped unless the user explicitly
+asks for it — spawning a workspace is not by itself a request to group it. When
+grouping *is* requested, the folder's header is a dedicated placeholder
 workspace cmux spawns as the group's anchor; the origin and each spawned slice
 are members under it. This follows cmux's group model, where the anchor is a
 dedicated, freshly-spawned workspace that *is* the header — an existing
 workspace is never promoted to anchor (see
 [cmux's workspace-groups doc](https://github.com/manaflow-ai/cmux/blob/main/docs/workspace-groups.md)).
-When a slice is closed or cancelled and only the placeholder header and the
-origin are left, the folder is dissolved (its anchor is closed, the origin
+When a grouped slice is closed or cancelled and only the placeholder header and
+the origin are left, the folder is dissolved (its anchor is closed, the origin
 preserved) so a lone workspace never sits inside an empty folder. If the user
 is on a branch
 they made by hand and there's no matching cmux workspace, suggest the
@@ -33,7 +36,8 @@ repo. Prefer this over editing the main worktree directly.
 
 Creates a `feature/<slug>` worktree under `.worktrees/<slug>` and opens a new
 cmux workspace named `<repo-basename>-<slug>` with Claude Code running inside
-it, grouped under the origin's `📁 <repo-basename>` sidebar folder.
+it. The new workspace is left standalone unless the user explicitly asks to
+group it under the origin's `📁 <repo-basename>` sidebar folder.
 
 Skip for trivial fixes, tiny doc tweaks, or when the user is already inside
 an isolated worktree.
