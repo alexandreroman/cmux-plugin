@@ -7,6 +7,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.5.2] — 2026-06-07
+
+### Changed
+- Sidebar grouping is now **opt-in**. `new-workspace` no longer groups the spawned workspace by default — it leaves it as a standalone sidebar entry and only builds or joins the origin's `📁 <repo-basename>` folder when the user explicitly asks. `close-workspace` and `cancel-workspace` already no-op when the workspace isn't grouped; their dissolution steps now say so. The full grouping feature (CLI model, anchor placeholder = header) is kept, just no longer applied automatically.
+- Consolidated the grouping mechanics (create-or-join + dissolve) into a single `references/workspace-grouping.md`. `new-workspace`, `close-workspace`, and `cancel-workspace` now keep just the opt-in gate and link the recipe, removing the inlined shell and the verbatim close/cancel duplication.
+
+### Fixed
+- `open-browser`: stopped passing `--direction` to `cmux browser open-split` (the daemon silently ignores it) and hard-coding `surface:2`. It now opens at the URL and captures the returned surface ref, matching `references/browser-automation.md`.
+- `README.md`: point cmux links at `https://cmux.com` (was the stale `www.cmux.dev`).
+- `skills/cmux/SKILL.md`: add the `sidebars` topic to the documented `cmux docs` list (the CLI exposes it).
+
+---
+
 ## [1.5.1] — 2026-06-04
 
 ### Fixed
