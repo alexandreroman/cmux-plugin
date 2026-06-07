@@ -55,54 +55,13 @@ This skill is destructive — uncommitted work and unmerged commits will be lost
     git -C <main-worktree> branch -D feature/<slug>
     ```
 
-11. **If this workspace was grouped, dissolve the group when it's the last slice.**
-    Grouping is opt-in, so this workspace is often *not* in any group — then the
-    block below finds no group and is a harmless no-op. When it *is* a member of
-    the origin's `📁` sidebar group, the group's anchor is the placeholder
-    workspace that renders the header, and the origin and isolated slices are
-    members. Once this slice leaves, the group may hold only the placeholder
-    header and the origin — pointless, so dissolve it. Closing the anchor
-    dissolves the group, preserves the origin as an ungrouped workspace, and
-    clears the placeholder. Do this *before* closing our own workspace (next
-    step): once the workspace closes, this Claude is gone and cannot run the
-    cleanup. Treat the whole step as best-effort.
-    ```bash
-    SELF=$(cmux identify --json | jq -r '.caller.workspace_ref')
-    GROUP=$(cmux workspace-group list --json \
-      | jq -r --arg s "$SELF" \
-          '.groups[] | select(.member_workspace_refs | index($s)) | .ref' \
-      | head -n1)
-    if [ -n "$GROUP" ]; then
-      COUNT=$(cmux workspace-group list --json \
-        | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .member_count')
-      if [ "$COUNT" -le 3 ]; then
-        # placeholder header + origin + us → after we leave nothing but the
-        # header and origin remain. Dissolve by closing the anchor (the
-        # placeholder that renders the 📁 header); cmux then preserves every
-        # other member, including the origin, as an ungrouped workspace.
-        ANCHOR=$(cmux workspace-group list --json \
-          | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .anchor_workspace_ref')
-        # The placeholder cmux spawns inherits the origin's directory, so the
-        # origin and the anchor share the main-worktree path. Only close the
-        # anchor when a *distinct* member also sits at the main worktree — that
-        # member is the origin, which proves the anchor is the throwaway
-        # placeholder and not a real workspace. Otherwise (e.g. a group whose
-        # anchor IS the origin) just ungroup, so the origin is never closed.
-        ORIGIN=$(cmux workspace list --json \
-          | jq -r --arg d "<main-worktree>" --arg a "$ANCHOR" \
-              '.workspaces[]? | select(.current_directory==$d and .ref!=$a) | .ref' \
-          | head -n1)
-        if [ -n "$ANCHOR" ] && [ "$ANCHOR" != "$SELF" ] && [ -n "$ORIGIN" ]; then
-          cmux workspace close "$ANCHOR"
-        else
-          cmux workspace-group ungroup "$GROUP"
-        fi
-      else
-        # other slices remain — just drop ourselves from the group.
-        cmux workspace-group remove --workspace "$SELF"
-      fi
-    fi
-    ```
+11. **If this workspace was grouped, dissolve the group (best-effort).** Grouping
+    is opt-in, so this workspace is often *not* in any group — then this is a
+    no-op. Follow the **Dissolve** recipe in
+    [../cmux/references/workspace-grouping.md](../cmux/references/workspace-grouping.md),
+    passing the main-worktree path resolved in step 3. Do it *before* closing our
+    own workspace (next step): once the workspace closes, this Claude is gone and
+    cannot run the cleanup.
 
 12. **Close this cmux workspace** (last — this kills the running Claude Code):
     ```bash

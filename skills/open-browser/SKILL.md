@@ -6,14 +6,17 @@ argument-hint: "[url]"
 
 Open a cmux browser split for visual verification.
 
-1. Check we're inside cmux — if not, explain that this requires cmux and stop
-2. Get current surface ID from `cmux identify --json`
-3. Open a browser split to the right: `cmux browser surface:<id> open-split --direction right`
-4. Wait 1 second for the split to initialize
-5. Navigate to: $ARGUMENTS (if provided) or <http://localhost:3000> (default)
-   `cmux browser surface:2 navigate "<url>"`
-6. Take a snapshot to confirm the page loaded: `cmux browser surface:2 snapshot --compact`
-7. Report what you see — page title, any visible errors, key UI elements
-
-If $ARGUMENTS contains a specific element to check (e.g. "localhost:8080 check the nav"),
-extract both the URL and the intent and act accordingly.
+1. Check we're inside cmux — if not, explain that this requires cmux and stop.
+2. Resolve the URL: `$ARGUMENTS` if provided, otherwise `http://localhost:3000`.
+   If `$ARGUMENTS` also names something to check (e.g. "localhost:8080 check the
+   nav"), extract both the URL and the intent.
+3. Open the browser split at that URL and capture the returned surface ref
+   (`open-split` opens directly at the URL; it does not take a `--direction`
+   flag):
+   ```bash
+   OUT=$(cmux browser open-split "<url>")
+   SURFACE=$(echo "$OUT" | sed -E 's/.*surface=(surface:[0-9]+).*/\1/')
+   ```
+4. Confirm the page loaded: `cmux browser "$SURFACE" snapshot --compact`.
+5. Report what you see — page title, any visible errors, key UI elements (and
+   the requested intent, if one was given).

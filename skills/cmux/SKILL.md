@@ -181,7 +181,7 @@ The commands above cover 95% of cases. For anything else, ask cmux directly:
 cmux --help                  # Full command list
 cmux <command> --help        # Per-command flags (e.g. cmux browser --help)
 cmux docs <topic>            # Fetchable URLs for in-depth docs
-                             # topics: settings · shortcuts · api · browser · agents · dock
+                             # topics: settings · shortcuts · api · browser · agents · dock · sidebars
 cmux capabilities            # JSON list of every RPC method the daemon exposes
 ```
 

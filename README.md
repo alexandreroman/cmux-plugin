@@ -1,6 +1,6 @@
 # CMUX-PLUGIN — for Claude Code
 
-Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.dev) — the native macOS terminal built for AI coding agents.
+Integrates [Claude Code](https://claude.ai/code) with [cmux](https://cmux.com) — the native macOS terminal built for AI coding agents.
 
 ## What It Does
 
@@ -18,7 +18,7 @@ Integrates [Claude Code](https://claude.ai/code) with [cmux](https://www.cmux.de
 ## Requirements
 
 - macOS 14.0+
-- [cmux](https://www.cmux.dev) installed (`brew tap manaflow-ai/cmux && brew install --cask cmux`)
+- [cmux](https://cmux.com) installed (`brew tap manaflow-ai/cmux && brew install --cask cmux`)
 - cmux CLI symlinked: `sudo ln -sf "/Applications/cmux.app/Contents/Resources/bin/cmux" /usr/local/bin/cmux`
 - `jq` installed (`brew install jq`)
 

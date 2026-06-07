@@ -133,47 +133,13 @@ Follow these steps strictly. If any check fails, stop and report the reason.
 
 14. **Optionally group the new workspace (only when the user explicitly asks).**
     By default, **do not** group — leave the new workspace as a standalone
-    sidebar entry and skip straight to step 15. Run the grouping below *only*
-    when the user explicitly requested it, e.g. "group it under the origin",
-    "put it in a workspace group", "attach this to the `<repo>` group". Spawning
-    a workspace is not by itself a request to group it.
-
-    When grouping is requested, gather the origin and its isolated slices under
-    one collapsible `📁 <repo-basename>` folder per origin (the workspace this
-    skill runs in); there is exactly **one group per origin**.
-
-    A group's **anchor** is the placeholder workspace cmux spawns when the group
-    is created — that anchor *is* the `📁` header row, and it carries the group's
-    name. Keep it. Do **not** reassign the anchor to a real workspace or close
-    the placeholder: cmux draws the header from the original anchor, so removing
-    it strips the header and the members collapse into a flat, header-less list.
-
-    - Resolve the origin's ref: `ORIGIN=$(cmux identify --json | jq -r '.caller.workspace_ref')`.
-    - Reuse a group that already contains the origin (created by an earlier
-      `/cmux:new-workspace` from here); otherwise create one. `cmux
-      workspace-group create --from "$ORIGIN"` spawns the placeholder anchor
-      (the `📁 <repo-basename>` header) and folds the origin in as a member:
-      ```bash
-      GROUP=$(cmux workspace-group list --json \
-        | jq -r --arg o "$ORIGIN" \
-            '.groups[] | select(.member_workspace_refs | index($o)) | .ref' \
-        | head -n1)
-      if [ -z "$GROUP" ]; then
-        GROUP=$(cmux workspace-group create --name "<repo-basename>" --from "$ORIGIN" | awk '{print $2}')
-      fi
-      ```
-    - Fold the new isolated workspace into the group as a member, then keep the
-      origin first under the header so the parent leads its slices (`add` drops
-      the new member right after the anchor, ahead of the origin):
-      ```bash
-      cmux workspace-group add --group "$GROUP" --workspace "$NEW_WS"
-      ANCHOR=$(cmux workspace-group list --json \
-        | jq -r --arg g "$GROUP" '.groups[] | select(.ref==$g) | .anchor_workspace_ref')
-      cmux reorder-workspace --workspace "$ORIGIN" --after "$ANCHOR"
-      ```
-
-    Treat grouping as best-effort: if any of these calls fail, log it and carry
-    on — the worktree and workspace are already created and usable.
+    sidebar entry and skip to step 15. Spawning a workspace is not by itself a
+    request to group it. Only when the user explicitly asked to group it (e.g.
+    "group it under the origin", "put it in a workspace group") follow the
+    **Create or join** recipe in
+    [../cmux/references/workspace-grouping.md](../cmux/references/workspace-grouping.md),
+    passing the `NEW_WS` ref captured in step 13. Grouping is best-effort — if it
+    fails, the worktree and workspace are still created and usable.
 
 15. **Log a sidebar entry in the *current* workspace** (the main one — we are
     still here):

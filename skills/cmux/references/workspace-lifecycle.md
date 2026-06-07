@@ -20,8 +20,9 @@ workspace is never promoted to anchor (see
 [cmux's workspace-groups doc](https://github.com/manaflow-ai/cmux/blob/main/docs/workspace-groups.md)).
 When a grouped slice is closed or cancelled and only the placeholder header and
 the origin are left, the folder is dissolved (its anchor is closed, the origin
-preserved) so a lone workspace never sits inside an empty folder. If the user
-is on a branch
+preserved) so a lone workspace never sits inside an empty folder. The create and
+dissolve recipes live in
+[workspace-grouping.md](workspace-grouping.md). If the user is on a branch
 they made by hand and there's no matching cmux workspace, suggest the
 matching skill but verify the preconditions in the skill file
 before invoking — don't retrofit the cleanup logic onto an unrelated branch.
