@@ -2,20 +2,19 @@
 
 Guidance for working in this repository (the cmux Claude Code plugin).
 
-## Writing skill docs
+## Project memory
 
-When writing or updating any skill under `skills/` (the core `cmux` skill, the
-workspace-lifecycle skills, or any plugin documentation), describe the CLI in
-the **present tense, as it currently is**:
+Persist anything that should outlive a single conversation — decisions and
+their rationale, workflow preferences, corrective feedback, and external
+references — using the `skillbox:project-memory` skill. Invoke it proactively
+whenever such information surfaces; you don't need to be asked.
 
-- Do **not** use "now", "used to", "no longer", "previously", "restored", or
-  similar comparative wording.
-- Do **not** cite specific cmux version numbers when documenting behavior or
-  options. The skill pins no version by design — keep it that way.
-- Even when aligning the docs with a new cmux release, describe each option as
-  simply available — e.g. "emulation and network controls are available", not
-  "cmux 0.64.11 exposes…".
-
-The docs should read as a timeless description of the current CLI, not a
-changelog. Comparative or version-pinned wording rots and confuses agents
-reading it later.
+Memory lives in `.claude/project-memory/` at the repo root: an `MEMORY.md`
+index plus one file per memory under `references/`. **Always read `MEMORY.md`
+at the start of every session, before doing any other work** — it is not
+injected automatically, so you must load it yourself. Open the referenced
+files under `references/` whenever an index entry looks relevant to the task
+at hand (always before writing or updating a skill doc under `skills/`), and
+verify a recalled memory against the current code before acting on it. The skill itself is the
+source of truth for the exact format and the save/recall/conflict rules —
+follow it rather than restating its mechanics here.
